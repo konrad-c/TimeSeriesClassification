@@ -2,7 +2,6 @@
 \contentsline {section}{\numberline {2}Background}{2}
 \contentsline {subsection}{\numberline {2.1}Shapelets}{2}
 \contentsline {subsection}{\numberline {2.2}Distance Measure}{3}
-\contentsline {section}{\numberline {3}Literature Review}{3}
-\contentsline {section}{\numberline {4}Method}{3}
-\contentsline {section}{\numberline {5}Experimental Results}{3}
-\contentsline {section}{\numberline {6}Further Work}{3}
+\contentsline {section}{\numberline {3}Method}{3}
+\contentsline {section}{\numberline {4}Experimental Results}{3}
+\contentsline {section}{\numberline {5}Further Work}{3}

@@ -79,39 +79,47 @@ def plot_results(T_train, label_train, T_test, label_test):
     """
     Run timer and plot time complexity
     """
-    shapelet_nums = np.arange(400,601,50)
-    x = []
-    time = []
+    shapelet_nums = np.arange(10,200,10)#np.arange(500,2001,500)
+    pruned_nums = [-1]#np.arange(5,51,5)
+    raw_num = []
+    p_num = []
+    time_arr = []
     accuracy = []
-    for i in shapelet_nums:
-        # Check time
-        before = timeit.time.time()
-        T_train_features, T_shapelets = shapelets.motif_feature_approx(T_train, label_train, 50, i, reduced=True)
-        #T_train_features, T_shapelets = shapelets.ts_shapelet_features_univariate(T_train, i)
-        # Check accuracy
-        T_test_features = shapelets.ts_features_from_shapelets(T_test, T_train, np.array(T_shapelets))
-        # Normalize data
-        scaler = StandardScaler().fit(T_train_features)
-        T_train_features = scaler.transform(T_train_features)
-        T_test_features = scaler.transform(T_test_features)
-        # Predict
-        model_svc = LinearSVC()
-        params = {'C':(2,4,8,16,32,64,128,256,512,1024)}
-        clf = GridSearchCV(model_svc, params)
-        clf.fit(T_train_features, label_train)
-        after = timeit.time.time()
-        predictions = clf.predict(T_test_features)
-        # Save values
-        acc = np.round(1 - (np.where(np.array(predictions)-np.array(label_test) != 0)[0].shape[0]/float(len(predictions))), decimals=5)
-        t = np.round(after - before, decimals=2)
-        print(i,"ran in",t)
-        print("Accuracy ( p=",i,"):",acc)
-        x.append(i)
-        time.append(t)
-        accuracy.append(acc)
-    plt.plot(x, time, 'bo')
+    out_file = open("out_results.csv","w+")
+    out_file.write("raw_shapelet_num,pruned_shapelet_num,time,accuracy\n")
+    for j in pruned_nums:
+        for i in shapelet_nums:
+            # Check time
+            before = timeit.time.time()
+            #T_train_features, T_shapelets = shapelets.motif_feature_approx(T_train, label_train, j, i, reduced=True)
+            T_train_features, T_shapelets = shapelets.ts_shapelet_features_univariate(T_train, i)
+            # Check accuracy
+            T_test_features = shapelets.ts_features_from_shapelets(T_test, T_train, np.array(T_shapelets))
+            # Normalize data
+            scaler = StandardScaler().fit(T_train_features)
+            T_train_features = scaler.transform(T_train_features)
+            T_test_features = scaler.transform(T_test_features)
+            # Predict
+            model_svc = LinearSVC()
+            params = {'C':(2,4,8,16,32,64,128,256,512,1024)}
+            clf = GridSearchCV(model_svc, params)
+            clf.fit(T_train_features, label_train)
+            after = timeit.time.time()
+            predictions = clf.predict(T_test_features)
+            # Save values
+            acc = np.round(1 - (np.where(np.array(predictions)-np.array(label_test) != 0)[0].shape[0]/float(len(predictions))), decimals=5)
+            t = np.round(after - before, decimals=2)
+            print(j,i,"ran in",t)
+            print("Accuracy ( r=",j,"p=",i,"):",acc)
+            raw_num.append(i)
+            p_num.append(j)
+            time_arr.append(t)
+            accuracy.append(acc)
+            out_file.write(str(i)+","+str(j)+","+str(t)+","+str(acc)+"\n")
+    out_file.close()
+    plt.plot(raw_num, time_arr, 'bo')
     plt.show()
-    plt.plot(x, accuracy, 'g^')
+    plt.plot(raw_num, accuracy, 'g^')
     plt.show()
 
 def SAX_NN(T_train, label_train, T_test, label_test, reduced=False):

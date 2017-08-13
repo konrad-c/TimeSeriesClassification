@@ -11,18 +11,18 @@ def ts_shapelet_features_univariate(T,p):
     #s = T.shape[2] if len(T.shape) > 2 else 1
     subsequences = []
     total_num_subsequences = float(np.sum(np.array([num_subsequences(T,i) for i in range(3, m+1)])))
-    f = p/total_num_subsequences
-    #l_vals = np.random.choice(
-    #    np.arange(3,m+1),
-    #    size=p,
-    #    replace=True,
-    #    p=np.array([num_subsequences(T,l)/total_num_subsequences for l in range(3,m+1)]))
     # range over shapelet length
-    for l in range(3, m+1):#l_vals:
-        for _ in range(int(np.round(f*num_subsequences(T,l)))):
-            i = np.random.randint(0,n)      # random row in data
-            j = np.random.randint(0,m-l+1)  # random start time
-            subsequences.append([i,j,l])  # add shapelet parameters to subsequences
+    l_vals = np.random.choice(
+        np.arange(3,m+1),
+        size=p,
+        replace=True,
+        p=np.array([num_subsequences(T,l)/total_num_subsequences for l in range(3,m+1)]))
+    # range over shapelet length
+    for l_i in range(0, l_vals.shape[0]):
+        l = l_vals[l_i]
+        i = np.random.randint(0,n)      # random row in data
+        j = np.random.randint(0,m-l+1)  # random start time
+        subsequences.append([i,j,l])  # add shapelet parameters to subsequences
         # range over Streams (multivariate variables)
         #for k in range(0, s):
         # generate number of shapelets according to possible number of shapelets 
@@ -106,27 +106,31 @@ def motif_feature_approx(T,Y,p,r, reduced=False):
         i = np.random.randint(0,n)      # random row in data
         j = np.random.randint(0,m-l+1)  # random start time
         subsequences_raw[l_i] = np.array([i,j,l])  # add shapelet parameters to subsequences
+    subsequences_raw = np.array(subsequences_raw)
     
     ######## Prune Raw Shapelets ########
-    d_matrix = np.zeros((r, pd.unique(Y).shape[0]))
     if reduced:
-        subseq_vals = [''.join(ch for ch, _ in itertools.groupby(T_sax[i][j:j+l])) for i,j,l in subsequences_raw]
+        subseq_vals = np.array([''.join(ch for ch, _ in itertools.groupby(T_sax[i][j:j+l])) for i,j,l in subsequences_raw])
+        t_len = np.vectorize(len)
         T_sax = np.array([''.join(ch for ch, _ in itertools.groupby(s)) for s in T_sax])
+        mask = np.where((t_len(subseq_vals) > 1) * (t_len(subseq_vals) <= np.min(t_len(T_sax)))) 
+        subseq_vals = subseq_vals[mask]
+        subsequences_raw = subsequences_raw[mask]
+        _, unique_mask = np.unique(subseq_vals, return_index=True)
+        subseq_vals = subseq_vals[unique_mask]
+        subsequences_raw = subsequences_raw[unique_mask]
     else:
         subseq_vals = [T_sax[i][j:j+l] for i,j,l in subsequences_raw]
-        
+    
+    d_matrix = np.zeros((subseq_vals.shape[0], pd.unique(Y).shape[0]))
     for t in range(0, pd.unique(Y).shape[0]):
         target = pd.unique(Y)[t]
-        if reduced:
-            T_sax_target = np.array([''.join(ch for ch, _ in itertools.groupby(s)) for s in T_sax[np.where(Y == target)] ])
-        else:
-            T_sax_target = np.array(T_sax[np.where(Y == target)])
+        T_sax_target = np.array(T_sax[np.where(Y == target)])
         for s in range(0, len(subseq_vals)):
-            #subseq = subsequences_raw[s]
-            #i,j,l = subseq
             rmotif = subseq_vals[s]#T_sax[i][j:j+l]
             d_matrix[s,t] = np.sum(np.array([minDistSAX(rmotif, w, sax_model) for w in T_sax_target]))
     gap = np.abs(d_matrix[:,0] - d_matrix[:,1])
+    p = min(p, subseq_vals.shape[0]) - 1
     subsequences_pruned = subsequences_raw[np.argpartition(-gap, p)[:p]]
     # Generate transformed dataset using T and subsequences
     X = np.zeros((n,p))
