@@ -37,15 +37,17 @@ def shapelet_discovery(T_train, label_train, T_test, label_test, shapelet_num, a
     print("Accuracy (Test):",1 - (np.where(np.array(predictions)-np.array(label_test) != 0)[0].shape[0]/float(len(predictions))))
     print("Avg 5-fold Cross Validation Accuracy (Test):",np.mean(cross_val_score(model, T_test_features,label_test, cv=5)))
 
-def plot_results(out_filename, T_train, label_train, T_test, label_test, euclidean=False):
+def plot_results(out_filename, T_train, label_train, T_test, label_test, euclidean=False, nRuns=3, seed=-1):
     """
     Run timer and plot time complexity/accuracy
     """
+    print("Starting",out_filename, ("Euclidean" if euclidean else "SAX"))
+    before_dataset = timeit.time.time()
     if euclidean:
-        shapelet_nums = np.arange(10,200,10)
+        shapelet_nums = np.arange(1,52,5)#np.arange(10,200,10)
         pruned_nums = [-1]
     else:
-        shapelet_nums = np.arange(1,502,50)
+        shapelet_nums = np.arange(50,301,50)
         pruned_nums = np.arange(1,52,5)
     raw_num = []
     p_num = []
@@ -55,36 +57,43 @@ def plot_results(out_filename, T_train, label_train, T_test, label_test, euclide
     out_file.write("raw_shapelet_num,pruned_shapelet_num,time,accuracy\n")
     for j in pruned_nums:
         for i in shapelet_nums:
-            # Check time
-            before = timeit.time.time()
-            if euclidean:
-                T_train_features, T_shapelets = shapelets.ts_shapelet_features_univariate(T_train, i)
-            else:
-                T_train_features, T_shapelets = shapelets.motif_feature_approx(T_train, label_train, j, i, reduced=True)
-            # Check accuracy
-            T_test_features = shapelets.ts_features_from_shapelets(T_test, T_train, np.array(T_shapelets))
-            # Normalize data
-            scaler = StandardScaler().fit(T_train_features)
-            T_train_features = scaler.transform(T_train_features)
-            T_test_features = scaler.transform(T_test_features)
-            # Predict
-            model_svc = LinearSVC()
-            params = {'C':(2,4,8,16,32,64,128,256,512,1024)}
-            clf = GridSearchCV(model_svc, params)
-            clf.fit(T_train_features, label_train)
-            after = timeit.time.time()
-            predictions = clf.predict(T_test_features)
-            # Save values
-            acc = np.round(1 - (np.where(np.array(predictions)-np.array(label_test) != 0)[0].shape[0]/float(len(predictions))), decimals=5)
-            t = np.round(after - before, decimals=2)
+            acc = 0
+            t = 0
+            for _ in range(nRuns):
+                # Check time
+                before = timeit.time.time()
+                if euclidean:
+                    T_train_features, T_shapelets = shapelets.ts_shapelet_features_univariate(T_train, i, seed=seed)
+                else:
+                    T_train_features, T_shapelets = shapelets.motif_feature_approx(T_train, label_train, j, i, reduced=True, seed=seed)
+                # Check accuracy
+                T_test_features = shapelets.ts_features_from_shapelets(T_test, T_train, np.array(T_shapelets))
+                # Normalize data
+                scaler = StandardScaler().fit(T_train_features)
+                T_train_features = scaler.transform(T_train_features)
+                T_test_features = scaler.transform(T_test_features)
+                # Predict
+                model_svc = LinearSVC()
+                params = {'C':(2,4,8,16,32,64,128,256,512,1024)}
+                clf = GridSearchCV(model_svc, params)
+                clf.fit(T_train_features, label_train)
+                after = timeit.time.time()
+                predictions = clf.predict(T_test_features)
+                # Save values
+                acc = acc + np.round(1 - (np.where(np.array(predictions)-np.array(label_test) != 0)[0].shape[0]/float(len(predictions))), decimals=5)
+                t = t + np.round(after - before, decimals=2)
+            t= t/float(nRuns)
+            acc = acc/float(nRuns)
             print(j,i,"ran in",t)
-            print("Accuracy ( r=",j,"p=",i,"):",acc)
+            print("Accuracy ( p=",j,"r=",i,"):",acc)
             raw_num.append(i)
             p_num.append(j)
             time_arr.append(t)
             accuracy.append(acc)
             out_file.write(str(i)+","+str(j)+","+str(t)+","+str(acc)+"\n")
     out_file.close()
+    after_dataset = timeit.time.time()
+    print("Finished",out_filename, ("Euclidean" if euclidean else "SAX"),"in",np.round(before_dataset-after_dataset,decimals=2),"s")
 
 def SAX_NN(T_train, label_train, T_test, label_test, reduced=False):
     # Create SAX encoding model
@@ -151,17 +160,30 @@ def test_files(train_filenames, test_filenames):
         label_test = np.array(label_test).astype(np.float)
         T_test = np.array(T_test).astype(np.float)
         # Run tests
-        shapelet_discovery(T_train, label_train, T_test, label_test, 15, approx=True, useSVC=True)
-        #plot_results(path_train.split("\\")[-1].replace("TRAIN", "results_euclidean.csv"), T_train, label_train, T_test, label_test, euclidean=True)
-        #plot_results(path_train.split("\\")[-1].replace("TRAIN", "results_SAX.csv"), T_train, label_train, T_test, label_test, euclidean=False)
+        plot_results(path_train.split("\\")[-1].replace("TRAIN", "results_euclidean.csv"),
+            T_train,
+            label_train,
+            T_test,
+            label_test,
+            euclidean=True,
+            nRuns=3,
+            seed=2082)
+        plot_results(path_train.split("\\")[-1].replace("TRAIN", "results_SAX.csv"),
+            T_train,
+            label_train,
+            T_test,
+            label_test,
+            euclidean=False,
+            nRuns=3,
+            seed=2082)
 
 UCR_PATH = "UCRData\\"
 UCR_train = [os.path.join(dp, f) for dp, dn, filenames in os.walk(UCR_PATH) for f in filenames if os.path.splitext(f)[1] != '.csv' and "TRAIN" in f]
 UCR_test = [os.path.join(dp, f) for dp, dn, filenames in os.walk(UCR_PATH) for f in filenames if os.path.splitext(f)[1] != '.csv' and "TEST" in f]
-GUN_train = ["UCRData/Gun_Point/Gun_Point_TRAIN"]
-GUN_test = ["UCRData/Gun_Point/Gun_Point_TEST"]
+GUN_train = ["Gun_Point/Gun_Point_TRAIN"]
+GUN_test = ["Gun_Point/Gun_Point_TEST"]
 
-test_files(GUN_train, GUN_test)
+test_files(UCR_train, UCR_test)
 #shapelet_discovery(T_train, label_train, T_test, label_test, 500, approx=False, useSVC=True)
 #SAX_NN(T_train, label_train, T_test, label_test, reduced=False)
 #SAX_NN(T_train, label_train, T_test, label_test, reduced=True)

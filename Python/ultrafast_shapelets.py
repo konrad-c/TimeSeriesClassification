@@ -5,7 +5,9 @@ import itertools
 
 ### Choose p random subsequences for a multivariate time series
 ### Based on pseudocode in Ultra-fast Shapelets
-def ts_shapelet_features_univariate(T,p):
+def ts_shapelet_features_univariate(T,p, seed=-1):
+    if seed > 0:
+        np.random.seed(seed)
     n = T.shape[0]
     m = T.shape[1]
     #s = T.shape[2] if len(T.shape) > 2 else 1
@@ -81,7 +83,9 @@ def num_subsequences(T,i):
     return np.sum(np.array(list(map(len, T))) - (i-1))
 
 ### Generate p pruned shapelets and generate r random shapelets for pruning
-def motif_feature_approx(T,Y,p,r, reduced=False):
+def motif_feature_approx(T,Y,p,r, reduced=False, seed=-1):
+    if seed > 0:
+        np.random.seed(seed)
     ########### Convert T to SAX approx
     # Create General SAX encoding model with alphabet of size 13
     sax_model = pysax.SAXModel(alphabet="ABCDEFGHIJKLM")
@@ -107,6 +111,7 @@ def motif_feature_approx(T,Y,p,r, reduced=False):
         j = np.random.randint(0,m-l+1)  # random start time
         subsequences_raw[l_i] = np.array([i,j,l])  # add shapelet parameters to subsequences
     subsequences_raw = np.array(subsequences_raw)
+    backup_subsequences = subsequences_raw
     
     ######## Prune Raw Shapelets ########
     if reduced:
@@ -131,17 +136,22 @@ def motif_feature_approx(T,Y,p,r, reduced=False):
             #print(SAX_vec(T_sax_target, subseq_vals[s], sax_model))
             d_matrix[s,t] = np.sum(np.array([minDistSAX(subseq_vals[s], w, sax_model) for w in T_sax_target])) #SAX_vec(T_sax_target, subseq_vals[s], sax_model))#
     # remove zero and inf distances:
-    print(d_matrix)
     zeroinf_mask = ~((np.sum(d_matrix,axis=1) == 0) + (np.sum(d_matrix,axis=1) == np.inf))
     d_matrix = d_matrix[zeroinf_mask]
     subseq_vals = subseq_vals[zeroinf_mask]
     subsequences_raw = subsequences_raw[zeroinf_mask]
     # Calculate importance of shapelets
-    prob_matrix = (d_matrix+1)/np.sum((d_matrix+1),axis=1,keepdims=True)
+    # p(x_i) = [(max(x) - x_i)+1]/sum([(max(x) - x_i)+1])
+    inv_d_matrix = -d_matrix + np.amax(d_matrix,axis=1,keepdims=True)
+    prob_matrix = (inv_d_matrix+1)/np.sum((inv_d_matrix+1),axis=1,keepdims=True)
+    # This maximises distance: prob_matrix = (d_matrix+1)/np.sum((d_matrix+1),axis=1,keepdims=True)
     entropy = -np.sum(prob_matrix*np.log2(prob_matrix),axis=1)
     #gap = np.abs(d_matrix[:,0] - d_matrix[:,1])
-    p = min(p, subseq_vals.shape[0]) - 1
-    subsequences_pruned = subsequences_raw[np.argpartition(entropy, p)[:p]]
+    p = min(p, subseq_vals.shape[0])
+    subsequences_pruned = subsequences_raw[np.argpartition(entropy, p-1)[:p]]
+    ## Check subsequences isn't empty
+    if subsequences_pruned.shape[0] == 0:
+        subsequences_pruned = backup_subsequences[np.random.choice(backup_subsequences.shape[0],size=p, replace=False)]
     # Generate transformed dataset using T and subsequences
     X = np.zeros((n,p))
     for j in range(0, p):
