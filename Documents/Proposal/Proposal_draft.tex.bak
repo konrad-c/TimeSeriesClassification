@@ -61,13 +61,21 @@ In the field of time series classification, Nearest Neighbour (NN)
 classification models provide highly accurate methods for binary and multiclass classification.
 However due to the large time complexity associated with NN models, an increasingly common technique involves Nearest Centroid approximations of NN.
 A recent promising concept in this field are time series shapelets which have shown to be orders of magnitude faster than NN classifiers with comparable accuracy.
-\\
+\\\\
 As noted by Rakthanmanon \& Keogh (2013), in comparison with NN, a "\textit{lazy} classifier", shapelets lead to \textit{eager} classifiers. 
 Current shapelet discovery methods (and models utilising shapelets for classification) aim to determine class representative shapelets.
-Resultantly there is some amount of information loss when a single shapelet is used as a class identifier.
-Which we hypothesise contributes to low classification accuracy among more complex time series.
-\\
-This research aims to investigate and produce a k-Nearest Shapelet classification method for time series which aims to increase classification accuracy among larger and more complex time series data.
+Resultantly there is some amount of information loss when a single shapelet is used as a class identifier [6,7].
+\\\\
+This research aims to utilise sequential aggregate approximation (SAX) for shapelet distance approximation to aid randomly generated shapelet pruning. 
+This research is based on the principle proposed by Wisstuba et al. (2015) that a class representative shapelet will occur often in a dataset.
+Under this assumption the random generation of shapelets will produce class representative shapelets for a given dataset.
+The algorithm designed by Wisstuba et al. (2015) converts minimum shapelet distances from time series data into a transformed feature set. 
+This transformation involves calculating minimum subsequence distance over numerous shapelets which becomes infeasible for large datasets or large numbers of shapelets (which invariably produce more accurate results).
+Using approximate distance measures to determine class representative shapelets will thus reduce the necessary computation to attain accurate prediction from the \textit{ultra-fast shapelet} algorithm.
+\\\\
+We additionally propose an approximate time series representation based on SAX to aid in fast shapelet scoring and pruning.
+In preliminary experiments this reduced SAX form has shown comparable accuracy to conventional SAX representation and unsimplified time series representations in shapelet based classification.
+These results, coupled with faster shapelet discovery and shapelet scoring demonstrate the need for further investigation.
 
 \section{Background}
 \subsection{Shapelets}
@@ -76,22 +84,36 @@ While NN classification models are still renowned for their high accuracy despit
 Shapelets aim to determine a key subsequence within a class of classifiable time series' which is representative of that class [3].
 They have been shown to be robust to noise due to the shapelet defining a common subsequence in a given class.
 Additionally being robust to time series length given they represent a common subsequence, length normalization may be omitted in favour of more information rich data.
-The use of shapelets in classificaton models involves the creation of decision-trees using  the most likely fitting shapelet as a feature.
+\\\\
+The use of shapelets in classificaton models involves the creation of decision-trees using  the most likely fitting shapelet as a feature [1,2,3].
 As a result, in \textit{n}-class classification, the resulting number of extracted features will be \textit{n}.
 These shapelets are produced by maximising occurrences of a subsequence (shapelet) in a given class and minimising occurrences of the same subsequence in other classes.
-However there still exists a level of information loss due to this, exemplified in cases where multiple shapelets may define a class to a greater extent than a single subsequence.
-\\\\
-
-
+However there still exists a level of information loss due to this, there exist a number of cases where multiple shapelets may define a class to a greater extent than a single subsequence [6,7].
+\\
 
 \subsection{Distance Measure}
+Euclidean distance is one of the most common distance measures for both NN classification as well as shapelet based classification methods [1,2,3,4].
+Dynamic Time Warping (DTW) has in recent years been shown in a number of cases to improve classification accuracy in NN models [4,5].
+The use of shapelets in time series classification has utilised Euclidean distance measures for a large area of research [1,2,3] however DTW as a measure of shapelet subsequence distance has been shown to outperform 1-NN-DTW and existing shapelet models in a number of real world and UCR datasets [4].
 
-		
-\section{Literature Review}
+In research that uses euclidean distance measures, shapelets are still competitive with regard to classification accuracy [1,2,3,4,6]. 
+Techniques have been developed that are orders of magnitude faster than traditional NN (using numerous distance measures) and exhaustive shapelet search (ES) [1,7].
+Despite DTW being a more accurate distance measure in NN classification, techniques involving top \textit{k} shapelets [6,7] result in lower error associated with euclidean distance measures.
+\\
+
 
 \section{Method}
 
-\section{Experimental Results}
+Below we outline the methods by which both the shapelet discovery algorithm and reduced SAX representations will be investigated and tested both experimentally and formally.
+
+\subsection{Reduced Sequential Aggregate Approximation (RSAX)}
+
+\subsection{Shapelet Discovery}
+
+\subsubsection{Shapelet Scoring and Pruning}
+
+
+\section{Preliminary  Results}
 
 \section{Further Work} 
 
@@ -110,6 +132,16 @@ Ye, L., \& Keogh, E. (2011). Time series shapelets: a novel technique that allow
 
 \bibitem{4}
 Shah, M., Grabocka, J., Schilling, N., Wistuba, M., \& Schmidt-Thieme, L. (2016, March). Learning DTW-shapelets for time-series classification. In \textit{Proceedings of the 3rd IKDD Conference on Data Science}, 2016 (p. 3). ACM.
+
+\bibitem{5}
+Petitjean, F., Forestier, G., Webb, G. I., Nicholson, A. E., Chen, Y., \& Keogh, E. (2016). Faster and more accurate classification of time series by exploiting a novel dynamic time warping averaging algorithm. \textit{Knowledge and Information Systems}, 47(1), 1-26.
+
+\bibitem{6}
+Lines, J., Davis, L. M., Hills, J., \& Bagnall, A. (2012, August). A shapelet transform for time series classification. In \textit{Proceedings of the 18th ACM SIGKDD international conference on Knowledge discovery and data mining} (pp. 289-297). ACM.\\
+Available at \textbf{https://ueaeprints.uea.ac.uk/40201/1/LinesKDD2012.pdf}
+
+\bibitem{7}
+Wistuba, M., Grabocka, J., \& Schmidt-Thieme, L. (2015). Ultra-fast shapelets for time series classification. \textit{arXiv preprint} arXiv:1503.05018.
 
 \end{thebibliography}
 

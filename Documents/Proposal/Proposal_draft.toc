@@ -3,5 +3,8 @@
 \contentsline {subsection}{\numberline {2.1}Shapelets}{2}
 \contentsline {subsection}{\numberline {2.2}Distance Measure}{3}
 \contentsline {section}{\numberline {3}Method}{3}
-\contentsline {section}{\numberline {4}Experimental Results}{3}
+\contentsline {subsection}{\numberline {3.1}Reduced Sequential Aggregate Approximation (RSAX)}{3}
+\contentsline {subsection}{\numberline {3.2}Shapelet Discovery}{3}
+\contentsline {subsubsection}{\numberline {3.2.1}Shapelet Scoring and Pruning}{3}
+\contentsline {section}{\numberline {4}Preliminary Results}{3}
 \contentsline {section}{\numberline {5}Further Work}{3}

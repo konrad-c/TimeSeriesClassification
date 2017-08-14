@@ -120,18 +120,28 @@ def motif_feature_approx(T,Y,p,r, reduced=False):
         subseq_vals = subseq_vals[unique_mask]
         subsequences_raw = subsequences_raw[unique_mask]
     else:
-        subseq_vals = [T_sax[i][j:j+l] for i,j,l in subsequences_raw]
+        subseq_vals = np.array([T_sax[i][j:j+l] for i,j,l in subsequences_raw])
     
     d_matrix = np.zeros((subseq_vals.shape[0], pd.unique(Y).shape[0]))
+    SAX_vec = np.vectorize(minDistSAX)
     for t in range(0, pd.unique(Y).shape[0]):
         target = pd.unique(Y)[t]
-        T_sax_target = np.array(T_sax[np.where(Y == target)])
+        T_sax_target = T_sax[np.where(Y == target)]
         for s in range(0, len(subseq_vals)):
-            rmotif = subseq_vals[s]#T_sax[i][j:j+l]
-            d_matrix[s,t] = np.sum(np.array([minDistSAX(rmotif, w, sax_model) for w in T_sax_target]))
-    gap = np.abs(d_matrix[:,0] - d_matrix[:,1])
+            #print(SAX_vec(T_sax_target, subseq_vals[s], sax_model))
+            d_matrix[s,t] = np.sum(np.array([minDistSAX(subseq_vals[s], w, sax_model) for w in T_sax_target])) #SAX_vec(T_sax_target, subseq_vals[s], sax_model))#
+    # remove zero and inf distances:
+    print(d_matrix)
+    zeroinf_mask = ~((np.sum(d_matrix,axis=1) == 0) + (np.sum(d_matrix,axis=1) == np.inf))
+    d_matrix = d_matrix[zeroinf_mask]
+    subseq_vals = subseq_vals[zeroinf_mask]
+    subsequences_raw = subsequences_raw[zeroinf_mask]
+    # Calculate importance of shapelets
+    prob_matrix = (d_matrix+1)/np.sum((d_matrix+1),axis=1,keepdims=True)
+    entropy = -np.sum(prob_matrix*np.log2(prob_matrix),axis=1)
+    #gap = np.abs(d_matrix[:,0] - d_matrix[:,1])
     p = min(p, subseq_vals.shape[0]) - 1
-    subsequences_pruned = subsequences_raw[np.argpartition(-gap, p)[:p]]
+    subsequences_pruned = subsequences_raw[np.argpartition(entropy, p)[:p]]
     # Generate transformed dataset using T and subsequences
     X = np.zeros((n,p))
     for j in range(0, p):
