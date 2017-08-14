@@ -17,7 +17,7 @@
         \vspace*{1cm}
         
         \LARGE
-        \textbf{k-Nearest Shapelets for Time Series Classification}
+        \textbf{Using Reduced SAX Representations for Pruning Randomly Generated Shapelets}
         
         \vspace{4cm}
         
@@ -113,7 +113,20 @@ Below we outline the methods by which both the shapelet discovery algorithm and 
 \subsubsection{Shapelet Scoring and Pruning}
 
 
-\section{Preliminary  Results}
+\section{Preliminary Experimental Results}
+
+In order to provide motivation for further investigation of the ideas mentioned in the introduction to this research, preliminary experiments have been conducted with the following results.
+
+\begin{figure}\begin{center}
+\includegraphics[width=0.8\textwidth]{Images/Time_comparison.png}
+\caption{Plot of time taken for shapelet discovery and classification model training and testing. \textbf{Top}: Time taken using reduced SAX pruning methods. \textbf{Bottom}: Time taken using \textit{Ultra-Fast Shapelets} algorithm.}
+\end{center}\end{figure}
+
+\begin{figure}\begin{center}
+\includegraphics[width=0.8\textwidth]{Images/Accuracy_comparison.png}
+\caption{Plot of accuracy of classification models created from shapelets discovered using two methods. \textbf{Top}: Accuracy using reduced SAX pruning methods. \textbf{Bottom}: Accuracy using \textit{Ultra-Fast Shapelets} algorithm.}
+\end{center}\end{figure}
+
 
 \section{Further Work} 
 
