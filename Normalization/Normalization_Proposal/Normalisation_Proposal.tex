@@ -1,0 +1,141 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{float}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\usepackage{graphicx}
+\usepackage{scrextend}
+\usepackage{wrapfig}
+\usepackage{enumitem}
+\author{Konrad Cybulski}
+\title{Investigating the Effect of Different Data Normalization Techniques on Time Series Classification Accuracy}
+\begin{document}
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+        
+        \LARGE
+        \textbf{Investigating the Effect of Different Data Normalization Techniques on Time Series Classification Accuracy}
+        
+        \vspace{4cm}
+        
+		\Large 
+        
+        \textbf{Konrad Cybulski}
+        
+        
+        \LARGE
+        \vspace{2cm}
+
+        
+        
+        \vfill
+        
+        
+        
+        Research Proposal \\
+        FIT2082 Research Project
+        
+        
+        \includegraphics[width=0.4\textwidth]{Images/monash_emblem.jpg}
+              
+        
+        \large
+        Faculty of Information Technology\\
+        Monash University\\
+        Australia\\
+        15/08/2017
+        
+    \end{center}
+\end{titlepage}
+
+\pagebreak
+\tableofcontents
+\pagebreak
+
+\section{Introduction} 
+
+The UCR Time Series Classification Archive [1] is a data repository with over 1200 downloads and hundreds of references. 
+While the classification accuracy shown by predictive models on the UCR data is irrefutable, we aim to investigate the effect on classification accuracy the methods used in data normalization have had. 
+With data normalization techniques known to have significant impacts on prediction accuracy on many classifiers, in order to verify the accuracy of classification models an understanding of the impact of techniques used by UCR is necessary.
+\\\\
+The UCR Time Series Classification Archive is used as a benchmark dataset for hundreds of time series classification publications.
+As explored by Keogh \& Kasetty [3], there exists a real need for larger testing on real world data due to the bias introduced into time series classification techniques developed and tested on a single benchmark dataset.
+We aim to determine however whether it is not only the data on which techniques may be over-trained, but the normalization involved in creating such datasets.
+\\\\
+The raw unprocessed and non-normalized UCR data has been collected from Anthony Bagnall and Eamonn Keogh with the help of Geoff Web.
+
+\section{Aims}
+
+This research aims to investigate the effects of methods of data normalization in the context of time series classification. 
+We aim to investigate this particularly on the UCR Time Series Data Archive's [1] raw data.
+The aspects of data normalization investigated will include scalar data transformations (such as Z-score normalization and \textit{Min-Max} scaling) and the effects of time series length standardization.
+With regard to time series length standardization, current respective preprocessed UCR time series lengths will be used as a reference and a benchmark for classification accuracy.
+
+
+\section{Research Question}
+
+What effect do times series length and methods of data normalization have on classification accuracy?
+
+\section{Background}
+
+This background focuses on the techniques used in normalization, and literature in the area of the effect of normalization techniques on classifier (and regressor) accuracy.
+
+\subsection{Normalization Techniques}
+
+\subsection{Effect of Normalization on Time Series Classification Accuracy}
+
+
+\section{Research Methodology}
+
+This method briefly states the platforms which will be used to investigate the proposed research as introduced above.
+
+\subsection{Normalization Techniques}
+
+The original UCR Time Series Classification Archive data is normalized using z-score normalization.
+We aim to investigate the two most common scale normalization techniques: z-score normalization and \textit{min-max} normalization.
+Z-score normalization is most common and is most robust and similar to the original raw data when it conforms to a normal distribution.
+
+\section{Timeline}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline 
+Week: & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\ 
+\hline 
+Initial meeting & - & - & • &  &  &  &  &  &  &  &  &  \\ 
+\hline 
+Review of literature & - & - & • & • &  &  &  &  &  &  &  &  \\ 
+\hline 
+Writing proposal & - & - & • & • &  &  &  &  &  &  &  &  \\ 
+\hline 
+Replication of current research & - & - &  & • & • & • &  &  &  &  &  &  \\ 
+\hline 
+RSAX Development \& Testing & - & - &  &  &  & • & • & • &  &  &  &  \\ 
+\hline 
+Shapelet Scoring \& Pruning & - & - &  &  &  &  &  &  & • & • & • &  \\ 
+\hline 
+Project presentation & - & - &  &  &  &  &  &  &  &  &  & • \\ 
+\hline 
+Final report & - & - & • & • & • & • & • & • & • & • & • & • \\ 
+\hline 
+\end{tabular}
+
+\pagebreak
+\begin{thebibliography}{9}
+
+\bibitem{1}
+Yanping Chen, Eamonn Keogh, Bing Hu, Nurjahan Begum, Anthony Bagnall, Abdullah
+Mueen and Gustavo Batista (2015). The UCR Time Series Classification Archive. URL $www.cs.ucr.edu/~eamonn/time_series_data/$
+
+\bibitem{2}
+Petitjean, F., Forestier, G., Webb, G. I., Nicholson, A. E., Chen, Y., \& Keogh, E. (2016). Faster and more accurate classification of time series by exploiting a novel dynamic time warping averaging algorithm. \textit{Knowledge and Information Systems}, 47(1), 1-26.
+
+\bibitem{3}
+Keogh, E., \& Kasetty, S. (2003). On the need for time series data mining benchmarks: a survey and empirical demonstration. \textit{Data Mining and knowledge discovery}, 7(4), 349-371.
+
+$www.cs.ucr.edu/~eamonn/time_series_data/$
+
+\end{thebibliography}
+
+\end{document}

@@ -8,7 +8,7 @@ import os
 
 # Classification
 #from xgboost import XGBClassifier
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, GridSearchCV
 
@@ -37,6 +37,13 @@ def shapelet_discovery(T_train, label_train, T_test, label_test, shapelet_num, a
     print("Accuracy (Test):",1 - (np.where(np.array(predictions)-np.array(label_test) != 0)[0].shape[0]/float(len(predictions))))
     print("Avg 5-fold Cross Validation Accuracy (Test):",np.mean(cross_val_score(model, T_test_features,label_test, cv=5)))
 
+def f_importances(coef, names):
+    imp = coef
+    imp,names = zip(*sorted(zip(imp,names)))
+    plt.barh(range(len(names)), imp, align='center')
+    plt.yticks(range(len(names)), names)
+    plt.show()
+
 def plot_results(out_filename, T_train, label_train, T_test, label_test, euclidean=False, nRuns=3, seed=-1):
     """
     Run timer and plot time complexity/accuracy
@@ -47,8 +54,8 @@ def plot_results(out_filename, T_train, label_train, T_test, label_test, euclide
         shapelet_nums = np.arange(1,52,5)#np.arange(10,200,10)
         pruned_nums = [-1]
     else:
-        shapelet_nums = np.arange(50,301,50)
-        pruned_nums = np.arange(1,52,5)
+        shapelet_nums = np.arange(1,101,10)
+        pruned_nums = [6]#np.arange(1,52,5)
     raw_num = []
     p_num = []
     time_arr = []
@@ -65,18 +72,23 @@ def plot_results(out_filename, T_train, label_train, T_test, label_test, euclide
                 if euclidean:
                     T_train_features, T_shapelets = shapelets.ts_shapelet_features_univariate(T_train, i, seed=seed)
                 else:
-                    T_train_features, T_shapelets = shapelets.motif_feature_approx(T_train, label_train, j, i, reduced=True, seed=seed)
+                    T_train_features, T_shapelets, info = shapelets.motif_feature_approx(T_train, label_train, j, i, reduced=True, seed=seed)
                 # Check accuracy
                 T_test_features = shapelets.ts_features_from_shapelets(T_test, T_train, np.array(T_shapelets))
                 # Normalize data
-                scaler = StandardScaler().fit(T_train_features)
-                T_train_features = scaler.transform(T_train_features)
-                T_test_features = scaler.transform(T_test_features)
+                #scaler = StandardScaler().fit(T_train_features)
+                #T_train_features = scaler.transform(T_train_features)
+                #T_test_features = scaler.transform(T_test_features)
                 # Predict
-                model_svc = LinearSVC()
+                model_svc = SVC(kernel="linear")#LinearSVC()
                 params = {'C':(2,4,8,16,32,64,128,256,512,1024)}
                 clf = GridSearchCV(model_svc, params)
                 clf.fit(T_train_features, label_train)
+                # Get Feature importance
+                print("info:",info)
+                f_importances(clf.estimator.coef_, ["input"+i for i in range(T_shapelets.shape[0])])
+                print(clf.estimator.coef_);
+                
                 after = timeit.time.time()
                 predictions = clf.predict(T_test_features)
                 # Save values
@@ -143,7 +155,7 @@ def test_files(train_filenames, test_filenames):
             vals = line.replace("\n", "") .split(',')
             label_train.append(vals[0])
             T_train.append(vals[1:])
-        # TEST
+                # TEST
         for line in file_test:
             vals = line.replace("\n", "") .split(',')
             label_test.append(vals[0])
@@ -160,6 +172,7 @@ def test_files(train_filenames, test_filenames):
         label_test = np.array(label_test).astype(np.float)
         T_test = np.array(T_test).astype(np.float)
         # Run tests
+        """
         plot_results(path_train.split("\\")[-1].replace("TRAIN", "results_euclidean.csv"),
             T_train,
             label_train,
@@ -168,13 +181,14 @@ def test_files(train_filenames, test_filenames):
             euclidean=True,
             nRuns=3,
             seed=2082)
+        """
         plot_results(path_train.split("\\")[-1].replace("TRAIN", "results_SAX.csv"),
             T_train,
             label_train,
             T_test,
             label_test,
             euclidean=False,
-            nRuns=3,
+            nRuns=1,
             seed=2082)
 
 UCR_PATH = "UCRData\\"
@@ -183,7 +197,7 @@ UCR_test = [os.path.join(dp, f) for dp, dn, filenames in os.walk(UCR_PATH) for f
 GUN_train = ["Gun_Point/Gun_Point_TRAIN"]
 GUN_test = ["Gun_Point/Gun_Point_TEST"]
 
-test_files(UCR_train, UCR_test)
+test_files(GUN_train, GUN_test)
 #shapelet_discovery(T_train, label_train, T_test, label_test, 500, approx=False, useSVC=True)
 #SAX_NN(T_train, label_train, T_test, label_test, reduced=False)
 #SAX_NN(T_train, label_train, T_test, label_test, reduced=True)
