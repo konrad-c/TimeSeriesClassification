@@ -5,6 +5,7 @@ import itertools
 from fastdtw import fastdtw,dtw
 
 MAX_R =1000
+
 ### Choose p random subsequences for a multivariate time series
 ### Based on pseudocode in Ultra-fast Shapelets
 def ts_shapelet_features_univariate(T,p, seed=-1):
@@ -14,7 +15,6 @@ def ts_shapelet_features_univariate(T,p, seed=-1):
     subsequences = []
     total_num_subsequences = float(np.sum(np.array([num_subsequences(T,i) for i in range(3, m+1)])))
     # range over shapelet length
-    
     if seed > 0:
         np.random.seed(seed)
         l_vals = np.random.choice(
@@ -29,7 +29,6 @@ def ts_shapelet_features_univariate(T,p, seed=-1):
             size=p,
             replace=True,
             p=np.array([num_subsequences(T,l)/total_num_subsequences for l in range(3,m+1)]))
-            
     # range over shapelet length
     for l_i in range(0, l_vals.shape[0]):
         l = l_vals[l_i]

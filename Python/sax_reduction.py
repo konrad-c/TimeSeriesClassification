@@ -191,7 +191,7 @@ def test_files(train_filenames, test_filenames):
             nRuns=1,
             seed=2082)
 
-UCR_PATH = "UCRData\\"
+UCR_PATH = "UCRData_short\\"
 UCR_train = [os.path.join(dp, f) for dp, dn, filenames in os.walk(UCR_PATH) for f in filenames if os.path.splitext(f)[1] != '.csv' and "TRAIN" in f]
 UCR_test = [os.path.join(dp, f) for dp, dn, filenames in os.walk(UCR_PATH) for f in filenames if os.path.splitext(f)[1] != '.csv' and "TEST" in f]
 GUN_train = ["Gun_Point/Gun_Point_TRAIN"]
