@@ -96,7 +96,8 @@ This method briefly states the platforms which will be used to investigate the p
 
 The original UCR Time Series Classification Archive data is normalized using z-score normalization.
 We aim to investigate the two most common scale normalization techniques: z-score normalization and \textit{min-max} normalization.
-Z-score normalization is most common and is most robust and similar to the original raw data when it conforms to a normal distribution.
+Z-score normalization is most common and is most representative of the original raw data when it conforms to a normal distribution.
+
 
 \section{Timeline}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|}
