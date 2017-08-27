@@ -2,8 +2,8 @@
 \contentsline {section}{\numberline {2}Aims}{2}
 \contentsline {section}{\numberline {3}Research Question}{2}
 \contentsline {section}{\numberline {4}Background}{2}
-\contentsline {subsection}{\numberline {4.1}Normalization Techniques}{3}
-\contentsline {subsection}{\numberline {4.2}Effect of Normalization on Time Series Classification Accuracy}{3}
+\contentsline {subsection}{\numberline {4.1}Effect of Normalization on Time Series Classification Accuracy}{3}
 \contentsline {section}{\numberline {5}Research Methodology}{3}
 \contentsline {subsection}{\numberline {5.1}Normalization Techniques}{3}
-\contentsline {section}{\numberline {6}Timeline}{3}
+\contentsline {subsection}{\numberline {5.2}Classification Techniques}{4}
+\contentsline {section}{\numberline {6}Timeline}{4}

@@ -83,9 +83,26 @@ What effect do times series length and methods of data normalization have on cla
 
 This background focuses on the techniques used in normalization, and literature in the area of the effect of normalization techniques on classifier (and regressor) accuracy.
 
-\subsection{Normalization Techniques}
-
 \subsection{Effect of Normalization on Time Series Classification Accuracy}
+
+Methods of normalization are known to greatly affect the accuracy of classification in multivariate data sets.
+When there exists data from two distributions which have greatly different means and variances, normalization becomes an important factor in ensuring each variable does not skew prediction.
+In univariate datasets this may be less important.
+However despite this, in a number of predictive models, including neural networks and support vector classifiers, the multidimensional problem space becomes not only easier to train for, but additionally a number of mathematical functions depend on normalized data.
+In neural networks, the chosen activation functions depend heavily on this fact, with sigmoid activations becoming almost meaningless unless input is within the 0-1 range.
+Support vector machines require a standardised problem space if the hyperplanes used in the separation of classes can be fitted most accurately.
+While this itself is a more complex problem, we will focus on time series length standardisation, which is a more pressing and time series related problem.
+\\\\
+The UCR Time Series Data Archive's [1] cleaned data has a fixed time series length in each data set, while each data set has a vastly different length, it is important to recognize the effect this has on classification.
+One reason DTW distance measures are so effective is due to the different rates at which events occur across a number of occurrences.
+When an event may be registered in given amount of time, the same event might occur in a larger time frame in another occurrence, which using euclidean distance measurements would not match.
+This event cannot be solved by changing the time series length, however time series length is integral in determining how much information is required in a given time series to have optimal results.
+If a very small time series length is required to achieve high classification accuracy, the remainder of the raw time series is not required.
+This idea is similar to the notion of early detection, which is a separate area of time series classification.
+By changing time series length, both where they begin, and when they end, we control what section of the information and how much of it we allow classifiers to use for prediction.
+\\\\
+While more information allows for greater predictive accuracy, it may also introduce noise to the data, and additionally, the larger the data, the longer classification takes. 
+Changes in time series length allows us to understand the information gain/loss, and the slow-down/speed-up associated with it. 
 
 
 \section{Research Methodology}
@@ -94,10 +111,23 @@ This method briefly states the platforms which will be used to investigate the p
 
 \subsection{Normalization Techniques}
 
-The original UCR Time Series Classification Archive data is normalized using z-score normalization.
+The original UCR Time Series Classification Archive [1] data is normalized using z-score normalization.
 We aim to investigate the two most common scale normalization techniques: z-score normalization and \textit{min-max} normalization.
 Z-score normalization is most common and is most representative of the original raw data when it conforms to a normal distribution.
+Z-score normalization involves converting each data point into a positive or negative value representing how many standard deviations away from the mean the data point is.
+\textit{Min-max} normalization involves converting data into values between 0 and 1 by subtracting the minimum and dividing by the difference between the minimum and maximum values of the time series.
+These normalization techniques are simple and are very commonly used in order to remove the bias involved in variable with large values compared to other smaller valued data.
 
+\subsection{Classification Techniques}
+
+The UCR Time Series Classification Archive [1] specifies the lowest classification error possible using a number of techniques.\\
+1-NN Euclidean - This is the error using a one nearest neighbour algorithm with a euclidean distance measure.\\
+1-NN DTW Best Warping Window - The warping window is a hyper-parameter in the NN-DTW classification method which has been determined for each data set along with the error achieved with this optimal window.\\
+1-NN DTW No Warping Window - This is the error when no warping window is used in the NN-DTW classifier.\\
+With solely these three techniques we will determine the accuracy of normalized data.
+We choose to use these three techniques alone due to their power in time series classification [2] and the generality and simplicity of the algorithms.
+\\\\
+While other methods exist and may provide more accurate classifications, the use of NN classifiers will allow a better understanding of the homogeneity and relatedness of the normalized data within a given class.
 
 \section{Timeline}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|}
@@ -110,11 +140,11 @@ Review of literature & - & - & • & • &  &  &  &  &  &  &  &  \\
 \hline 
 Writing proposal & - & - & • & • &  &  &  &  &  &  &  &  \\ 
 \hline 
-Replication of current research & - & - &  & • & • & • &  &  &  &  &  &  \\ 
+Replication of current research & - & - &  &  & • & • &  &  &  &  &  &  \\ 
 \hline 
-RSAX Development \& Testing & - & - &  &  &  & • & • & • &  &  &  &  \\ 
+Testing scalar normalization & - & - &  &  &  &  & • & • &  &  &  &  \\ 
 \hline 
-Shapelet Scoring \& Pruning & - & - &  &  &  &  &  &  & • & • & • &  \\ 
+Testing time series length & - & - &  &  &  &  &  &  & • & • & • &  \\ 
 \hline 
 Project presentation & - & - &  &  &  &  &  &  &  &  &  & • \\ 
 \hline 

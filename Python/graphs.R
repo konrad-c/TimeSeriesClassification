@@ -6,8 +6,9 @@ library(ggpubr)
 setwd("C:/Users/kocyb_000/Documents/Uni/TimeSeriesClassification/Python")
 #setwd("E:/Documents/Uni/TimeSeriesClassification/Python")
 
-df_euclid = read.csv("Gun_Point_results_euclidean.csv")
-df_SAX = read.csv("Gun_Point_results_SAX.csv")
+filename = "Meat"
+df_euclid = read.csv(paste0(filename,"_results_euclidean.csv"))
+df_SAX = read.csv(paste0(filename,"_results_SAX.csv"))
 #df_SAX_large = read.csv("SAX_approx_large_raw_results.csv")
 #head(df_SAX_large)
 #df_SAX = rbind(df_SAX,df_SAX_large)
@@ -15,7 +16,7 @@ df_SAX = read.csv("Gun_Point_results_SAX.csv")
 SAX_time = df_SAX[,c(1,2,3)]
 SAX_acc = df_SAX[,c(1,2,4)]
 SAX_time$pruned_shapelet_num = factor(SAX_time$pruned_shapelet_num)
-SAX_acc$pruned_shapelet_num = factor(SAX_acc$pruned_shapelet_num)
+SAX_acc$raw_shapelet_num = factor(SAX_acc$raw_shapelet_num)
 
 time_SAX = ggplot(SAX_time, aes(x=raw_shapelet_num, y=time, color=pruned_shapelet_num)) +
   geom_line() +
@@ -41,7 +42,7 @@ acc_e = ggplot(df_euclid[c(1,4)], aes(x=raw_shapelet_num, y=accuracy)) +
   scale_y_continuous(limits=c(0.5,1)) +
   labs(title="Ultra-fast shapelets",x="Pruned Shapelets", y="Accuracy", legend.title="Pruned Shapelets")
 
-acc_SAX = ggplot(SAX_acc, aes(x=raw_shapelet_num, y=accuracy, color=pruned_shapelet_num)) +
+acc_SAX = ggplot(SAX_acc, aes(x=pruned_shapelet_num, y=accuracy, color=raw_shapelet_num)) +
   geom_line() +
   geom_point() +
   scale_color_discrete(name="Raw Shapelets") +
@@ -49,4 +50,17 @@ acc_SAX = ggplot(SAX_acc, aes(x=raw_shapelet_num, y=accuracy, color=pruned_shape
   scale_y_continuous(limits=c(0.5,1)) +
   labs(title="SAX Pruning" ,x="Pruned Shapelets", y="Accuracy", legend.title="Pruned Shapelets")
 
-ggarrange(acc_SAX, acc_e, ncol = 1, nrow=2, align = "h")
+grid.arrange(acc_SAX, acc_e)
+
+### Plot accuracy vs time
+df_euclid["Series"] = "Euclidean"
+df_SAX["Series"] = "RSAX"
+timevsacc = rbind(df_euclid[c(3,4,5)], df_SAX[c(3,4,5)])
+
+acc_time_e = ggplot(timevsacc, aes(x=time, y=accuracy, color=Series)) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  scale_y_continuous(limits=c(0.0,1)) +
+  labs(title="Ultra-fast shapelets",x="Time (s)", y="Accuracy", legend.title="Pruned Shapelets")
+acc_time_e
