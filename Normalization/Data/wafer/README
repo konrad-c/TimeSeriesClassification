@@ -1,0 +1,63 @@
+
+This subdirectory contains the wafer database as discussed in
+
+  Robert T. Olszewski.  "Generalized Feature Extraction for Structural
+  Pattern Recognition in Time-Series Data."  PhD thesis, Carnegie
+  Mellon University, Pittsburgh, PA, 2001.
+
+The wafer database comprises a collection of time-series data sets
+where each file contains the sequence of measurements recorded by one
+vacuum-chamber sensor during the etch process applied to one silicon
+wafer during the manufacture of semiconductor microelectronics.  Each
+wafer has an assigned classification of normal or abnormal.  The
+abnormal wafers are representative of a range of problems commonly
+encountered during semiconductor manufacturing.
+
+The data files contained in the wafer database were collected while
+monitoring an operational semiconductor fabrication plant.
+
+The directory structure is as follows:
+
+  wafer/README   - this file
+  wafer/abnormal - data files for abnormal wafers
+  wafer/normal   - data files for normal wafers
+
+The name of each data file has the following format:
+
+  <run>_<wafer>.<desc>
+
+where
+
+    <run> - the run (or batch) number
+  <wafer> - wafer number within the run
+   <desc> - file descriptor; set as follows:
+  
+
+6 - data from radio frequency forward power sensor
+                
+7 - data from radio frequency reflected power sensor
+                
+8 - data from chamber pressure sensor
+               
+11 - data from 405 nm emission sensor
+               
+12 - data from 520 nm emission sensor
+               
+15 - data from direct current bias sensor
+       
+
+
+       ann - descriptive information
+
+Direct all questions regarding the ECG database to
+
+  Robert Olszewski
+  Carnegie Mellon University
+  School of Computer Science
+  5000 Forbes Avenue
+  Pittsburgh, PA 15213-3891
+
+  bobski+@cs.cmu.edu
+
+  http://www.cs.cmu.edu/~bobski/
+
