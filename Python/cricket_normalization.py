@@ -107,32 +107,13 @@ def out_data(classification,x,y,z,path_out):
 def main():  ### Stretched
     classification,x,y,z = clean_data_stretched(cricket_data, size=300, rolling_average=True)
     out_data(classification,x,y,z,DATA_PATH_OUT + "StretchedAvg")
-    classification,x,y,z = clean_data_stretched(cricket_data, size=300, rolling_average=False)
-    out_data(classification,x,y,z,DATA_PATH_OUT + "Stretched")
+    #classification,x,y,z = clean_data_stretched(cricket_data, size=300, rolling_average=False)
+    #out_data(classification,x,y,z,DATA_PATH_OUT + "Stretched")
     ### Truncated
-    classification,x,y,z = clean_data_truncate(cricket_data)
-    out_data(classification,x,y,z,DATA_PATH_OUT + "Truncated")
+    #classification,x,y,z = clean_data_truncate(cricket_data)
+    #out_data(classification,x,y,z,DATA_PATH_OUT + "Truncated")
 
 main()
-
-#classification,x,y,z = clean_data(gestures_data)
-ucr_data = np.array(pd.read_csv("UCRData_long/Cricket_X/Cricket_X_TRAIN"))[:,1:]
-
-#classification,x,y,z = clean_data_timenormal(gestures_data, size=315)
-out_data(classification,x,y,z,DATA_PATH_OUT + "Stretched")
-
-# plot the times
-sample_size = 10
-ucr_sample = ucr_data[np.random.choice(ucr_data.shape[0], size=sample_size, replace=False)]
-for i in range(ucr_sample.shape[0]):
-    plt.plot(ucr_sample[i])
-plt.show()
-
-# plot the times
-for i in range(140,150):
-    plt.plot(x[i])
-plt.show()
-
 
 
 
