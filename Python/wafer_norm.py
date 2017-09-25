@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 def get_max_length(data):
     lengths = []
@@ -41,6 +42,8 @@ def raw_wafer(filenames_normal, filenames_abnormal, stretch_length=None, rolling
             vals = line.split("\t")
             if len(vals) > 1:
                 values_normal[i,j] = float(vals[-2])
+            else:
+                print("normal",i)
         f.close()
     for i in range(len(filenames_abnormal)):
         filename = filenames_abnormal[i]
@@ -49,11 +52,13 @@ def raw_wafer(filenames_normal, filenames_abnormal, stretch_length=None, rolling
             vals = line.split("\t")
             if len(vals) > 1:
                 values_abnormal[i,j] = float(vals[-2])
+            else:
+                print("abnormal",i)
         f.close()
     values = np.concatenate((values_normal,values_abnormal), axis=0)
     if stretch_length is not None:
         lengths = np.concatenate((get_lengths(filenames_normal), get_lengths(filenames_abnormal)))
-        stretch_values(values,lengths,stretch_length,rolling_average)
+        values = stretch_values(values,lengths,stretch_length,rolling_average)
     classification[:len(filenames_normal)] = "normal"
     classification[len(filenames_normal):] = "abnormal"
     
@@ -90,24 +95,26 @@ def plot_sample(x, sample_size=4):
         plt.plot(i)
     plt.show()
 
-def main(): 
-    DATA_PATH = "NormalizationData\\wafer\\"
-    wafer_normal = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH + "normal\\") for f in filenames]
-    wafer_abnormal = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH + "abnormal\\") for f in filenames]
-    DATA_PATH_OUT = "NormalizationData\\WaferClean\\"
+#def main(): 
+#    DATA_PATH = "NormalizationData\\waferRaw\\"
+#    wafer_normal = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH + "normal\\") for f in filenames]
+#    wafer_abnormal = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH + "abnormal\\") for f in filenames]
+#    DATA_PATH_OUT = "NormalizationData\\WaferClean\\"
     #classification,x = raw_wafer(wafer_normal,wafer_abnormal, stretch_length=None, rolling_average=False)
     #plot_sample(x,4)
     #out_data(classification,x,DATA_PATH_OUT + "Truncated")
     
-    classification,x = raw_wafer(wafer_normal,wafer_abnormal, stretch_length=152, rolling_average=False)
-    plot_sample(x,4)
-    out_data(classification,x,DATA_PATH_OUT + "Stretched")
+#    classification,x = raw_wafer(wafer_normal,wafer_abnormal, stretch_length=152, rolling_average=False)
+#    data = np.array(pd.read_csv("NormalizationData/WaferClean/UCRWafer.csv"))[:,1:]
+#    plot_sample(x,20)
+#    plot_sample(data,20)
+#    out_data(classification,x,DATA_PATH_OUT + "Stretched")
     
-    classification,x = raw_wafer(wafer_normal,wafer_abnormal, stretch_length=152, rolling_average=True)
-    plot_sample(x,4)
-    out_data(classification,x,DATA_PATH_OUT + "StretchedAvg")
+#    classification,x = raw_wafer(wafer_normal,wafer_abnormal, stretch_length=152, rolling_average=True)
+#    plot_sample(x,4)
+#    out_data(classification,x,DATA_PATH_OUT + "StretchedAvg")
 
-main()
+#main()
 
 
 

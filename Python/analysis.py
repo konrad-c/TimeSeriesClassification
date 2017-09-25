@@ -42,7 +42,7 @@ def DTWDistance(s1, s2,w=1):
         for j in range(max(0, i-w), min(s2.shape[0], i+w)):
             DTW[i+1, j+1] = dists[i][j] + min(DTW[i, j+1],DTW[i+1, j], DTW[i, j])
     return np.sqrt(DTW[-1, -1])
-    
+
 ###
 ### Sourced from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
 ###
@@ -80,11 +80,16 @@ def NN_DTW(x_train, y_train, x_test, y_test, w):
 def NN_accuracy(filename, normalizer=None, metric="euclidean", w=1, test_prop=0.5, seed=2082):
     np.random.seed(seed)
     data = pd.read_csv(filename, header=None)
+    result = NN(np.array(data), normalizer, metric, w, test_prop, seed)
+    return result
+
+def NN(data, normalizer=None, metric="euclidean", w=1, test_prop=0.5, seed=2082):
+    np.random.seed(seed)
     train, test = train_test_split(data, test_size=test_prop)
-    y_train = np.array(train[0])
-    x_train = np.array(train.drop(0, axis=1))
-    y_test= np.array(test[0])
-    x_test = np.array(test.drop(0, axis=1))
+    y_train = np.array(train[:,0])
+    x_train = np.array(train[:,1:])
+    y_test= np.array(test[:,0])
+    x_test = np.array(test[:,1:])
     if normalizer is not None:
         scaler = normalizer()
         scaler.fit(x_train)
@@ -98,6 +103,7 @@ def NN_accuracy(filename, normalizer=None, metric="euclidean", w=1, test_prop=0.
         predictions = classifier.predict(x_test)
         #print(classification_report(y_test, predictions))
         result = float(np.where(y_test == predictions)[0].shape[0])/float(predictions.shape[0])
+        #print(classification_report(y_test,predictions))
     return result
 
 

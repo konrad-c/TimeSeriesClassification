@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 DATA_PATH = "NormalizationData\\CricketDataRaw\\"
 DATA_PATH_OUT = "NormalizationData\\CricketClean\\"
@@ -33,9 +34,9 @@ def clean_data_truncate(cricket_data):
         f = open(filename)
         for line in f:
             vals = line.split(" ")
-            t_x.append(vals[0])
-            t_y.append(vals[1])
-            t_z.append(vals[2])
+            t_x.append(float(vals[0]))
+            t_y.append(float(vals[1]))
+            t_z.append(float(vals[2]))
         f.close()
         t_len = len(t_x)
         classification[i] = t_class
@@ -62,9 +63,9 @@ def clean_data_stretched(gestures_data, size=315, rolling_average=True):
         f = open(filename)
         for line in f:
             vals = line.split(" ")
-            t_x.append(vals[0])
-            t_y.append(vals[1])
-            t_z.append(vals[2])
+            t_x.append(float(vals[0]))
+            t_y.append(float(vals[1]))
+            t_z.append(float(vals[2]))
         f.close()
         t_len = len(t_x)
         classification[i] = t_class
@@ -113,7 +114,7 @@ def main():  ### Stretched
     #classification,x,y,z = clean_data_truncate(cricket_data)
     #out_data(classification,x,y,z,DATA_PATH_OUT + "Truncated")
 
-main()
+#main()
 
 
 
