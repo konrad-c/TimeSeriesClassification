@@ -60,6 +60,8 @@ def LB_Keogh(s1,s2,r):
     return np.sqrt(LB_sum)
     
 def NN_DTW(x_train, y_train, x_test, y_test, w):
+    if w is None:
+        w = x_train.shape[1]
     predictions = []
     for i in range(x_test.shape[0]):
         test_i = x_test[i]
@@ -77,13 +79,13 @@ def NN_DTW(x_train, y_train, x_test, y_test, w):
     #print(classification_report(y_test, predictions))
     return results
 
-def NN_accuracy(filename, normalizer=None, metric="euclidean", w=1, test_prop=0.5, seed=2082):
+def NN_accuracy(filename, normalizer=None, metric="euclidean", w=None, test_prop=0.5, seed=2082):
     np.random.seed(seed)
     data = pd.read_csv(filename, header=None)
     result = NN(np.array(data), normalizer, metric, w, test_prop, seed)
     return result
 
-def NN(data, normalizer=None, metric="euclidean", w=1, test_prop=0.5, seed=2082):
+def NN(data, normalizer=None, metric="euclidean", w=None, test_prop=0.5, seed=2082):
     np.random.seed(seed)
     train, test = train_test_split(data, test_size=test_prop)
     y_train = np.array(train[:,0])
@@ -95,7 +97,7 @@ def NN(data, normalizer=None, metric="euclidean", w=1, test_prop=0.5, seed=2082)
         scaler.fit(x_train)
         x_train = scaler.transform(x_train)
         x_test = scaler.transform(x_test)
-    if metric is "DTW":
+    if metric == "DTW":
         result = NN_DTW(x_train, y_train, x_test, y_test, w)
     else:
         classifier = KNeighborsClassifier(n_neighbors=1, metric='euclidean')

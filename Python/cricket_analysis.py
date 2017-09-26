@@ -157,13 +157,13 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
         for i in range(len(results_length)):
             out_file.write(str(results_length[i])+","+str(results_x[i])+","+str(results_y[i])+","+str(results_z[i])+"\n")
         out_file.close()
-    fig, axes = plt.subplots(nrows=3,ncols=1, sharex=True, sharey=True)
-    fig.set_size_inches(3, 7)
-    axes[0].scatter(results_length, results_x)
-    axes[1].scatter(results_length, results_y)
-    axes[2].scatter(results_length, results_z)
-    fig.tight_layout()
-    fig.show()
+    #fig, axes = plt.subplots(nrows=3,ncols=1, sharex=True, sharey=True)
+    #fig.set_size_inches(3, 7)
+    #axes[0].scatter(results_length, results_x)
+    #axes[1].scatter(results_length, results_y)
+    #axes[2].scatter(results_length, results_z)
+    #fig.tight_layout()
+    #fig.show()
 
 def get_data(metric, out_filename, runs, lengths):
     gridsearch_length(lengths, runs, metric=metric,seed=666, outfilename="Results\\Cricket\\"+out_filename)
@@ -183,7 +183,7 @@ def get_data_parallel(metric, out_filename, runs, window, lengths):
         print(str(j.name)+".exitcode = "+str(j.exitcode))
 
 if __name__ == '__main__':
-    get_data_parallel("DTW", "AccuracyLengthDTW.csv", 8, 1, [50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
+    get_data_parallel("DTW", "AccuracyLengthDTW_MaxWindow.csv", 8, None, [50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
 #get_data("euclidean", "AccuracyLengthEuclidean.csv", 100, [5,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,1500,3000])
 #get_data("DTW", "AccuracyLengthDTW.csv", 5, [50,100,200,300,400,500,600,800])
 
