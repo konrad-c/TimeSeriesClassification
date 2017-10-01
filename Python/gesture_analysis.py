@@ -41,190 +41,45 @@ gesture_filenames_UCR = {
     'z': "UCRData_long/uWaveGestureLibrary_Z/uWaveGestureLibrary_Z_TEST"
 }
 
-class RowStandardScaler:
-    def __init__(self):
-        self.mean = 0
-        self.std = 0
-        
-    def fit(self, X):
-        self.mean = np.mean(X)#[X != 0])
-        self.std = np.std(X)#[X != 0])
-    
-    def transform(self, X):
-        return (X - self.mean)/self.std
-        
-class RowMinMaxScaler:
-    def __init__(self):
-        self.minimum = 0
-        self.maximum = 0
-        
-    def fit(self, X):
-        self.minimum = np.min(X)
-        self.maximum = np.max(X)
-    
-    def transform(self, X):
-        return (X - self.minimum)/(self.maximum - self.minimum)
-###
-### Sourced from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
-###  
-def DTWDistance(s1, s2,w=1):
-    DTW={}
-
-    w = max(w, abs(len(s1)-len(s2)))
-
-    for i in range(-1,len(s1)):
-        for j in range(-1,len(s2)):
-            DTW[(i, j)] = float('inf')
-    DTW[(-1, -1)] = 0
-
-    for i in range(len(s1)):
-        for j in range(max(0, i-w), min(len(s2), i+w)):
-            dist= (s1[i]-s2[j])**2
-            DTW[(i, j)] = dist + min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
-
-    return np.sqrt(DTW[len(s1)-1, len(s2)-1])
-    
-###
-### Sourced from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
-###
-def LB_Keogh(s1,s2,r):
-    LB_sum=0
-    for ind,i in enumerate(s1):
-
-        lower_bound=min(s2[(ind-r if ind-r>=0 else 0):(ind+r)])
-        upper_bound=max(s2[(ind-r if ind-r>=0 else 0):(ind+r)])
-
-        if i>upper_bound:
-            LB_sum=LB_sum+(i-upper_bound)**2
-        elif i<lower_bound:
-            LB_sum=LB_sum+(i-lower_bound)**2
-
-    return np.sqrt(LB_sum)
-    
-###
-### Based on source from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
-###
-def NN_speedup(x_train, y_train, x_test, y_test, w):
-    predictions = []
-    for i in range(x_test.shape[0]):
-        test_i = x_test[i]
-        min_dist = float('inf')
-        closest_seq = None
-        for j in range(x_train.shape[0]):
-            train_j = x_train[j]
-            if LB_Keogh(test_i, train_j, 5) < min_dist:
-                dist = DTWDistance(test_i, train_j, w)
-                if dist < min_dist:
-                    min_dist = dist
-                    closest_seq = j
-        predictions.append(y_train[closest_seq])
-    return classification_report(y_test, predictions)
-
-def analysis(filename, normalizer, metric="DTW", w=1, test_prop=0.5):
-    data = pd.read_csv(filename, header=None)
-    train, test = train_test_split(data, test_size=test_prop)
-    y_train = np.array(train[0])
-    x_train = np.array(train.drop(0, axis=1))
-    y_test= np.array(test[0])
-    x_test = np.array(test.drop(0, axis=1))
-    if normalizer is not None:
-        scaler = normalizer()
-        scaler.fit(x_train)
-        x_train = scaler.transform(x_train)
-        x_test = scaler.transform(x_test)
-    
-    if metric is "DTW":
-        print(NN_speedup(x_train, y_train, x_test, y_test, w))
-    else:
-        classifier = KNeighborsClassifier(n_neighbors=1, metric='euclidean')
-        classifier.fit(x_train, y_train)
-        predictions = classifier.predict(x_test)
-        print(classification_report(y_test, predictions))
-
-def compare_ucr(filenames_ucr, filenames_raw, normalizer=None, sample_size=None, seed=8235416):
-    fig, axes = plt.subplots(nrows=3,ncols=2, sharex=True, sharey=True)
-    fig.set_size_inches(10, 7)
-    for d,dim in enumerate(['x','y','z']):
-        data_ucr = np.array(pd.read_csv(filenames_ucr[dim]))[:,1:]
-        data_raw = np.array(pd.read_csv(filenames_raw[dim]))[:,1:]
-        if normalizer is not None:
-            scaler = normalizer()
-            scaler.fit(data_raw)
-            data_raw = scaler.transform(data_raw)
-        if sample_size is not None:
-            np.random.seed(seed)
-            data_ucr = data_ucr[np.random.choice(data_ucr.shape[0], size=sample_size ,replace=True)]
-            np.random.seed(seed)
-            data_raw = data_raw[np.random.choice(data_raw.shape[0], size=sample_size ,replace=True)]
-        for i in range(data_ucr.shape[0]):
-            axes[d,0].plot(data_ucr[i])
-        for i in range(data_raw.shape[0]):
-            axes[d,1].plot(data_raw[i])
-    fig.tight_layout()
-    fig.show()
-    
-def compare_closest(filenames_ucr, filenames_raw,normalizer = None, measure='euclidean',sample_size=3, seed=8235416, filenames_comparison=None):
-    fig, axes = plt.subplots(nrows=3,ncols=(2 if filenames_comparison is None else 3), sharex=True, sharey=True)
-    fig.set_size_inches(10, 7)
-    for d,dim in enumerate(['x','y','z']):
-        data_ucr = np.array(pd.read_csv(filenames_ucr[dim]))[:,1:]
-        data_raw = np.array(pd.read_csv(filenames_raw[dim]))[:,1:]
-        if filenames_comparison is not None:
-            data_comp = np.array(pd.read_csv(filenames_comparison[dim]))[:,1:]
-        if normalizer is not None:
-            scaler = normalizer()
-            scaler.fit(data_raw)
-            data_raw = scaler.transform(data_raw)
-            if filenames_comparison is not None:
-                scaler_comp = normalizer()
-                scaler_comp.fit(data_comp)
-                data_comp = scaler_comp.transform(data_comp)
-        np.random.seed(seed)
-        data_ucr = data_ucr[np.random.choice(data_ucr.shape[0], size=sample_size ,replace=True)]
-        NN = NearestNeighbors(n_neighbors=1, metric='euclidean')
-        NN.fit(data_raw)
-        data_raw = data_raw[NN.kneighbors(data_ucr, return_distance=False).reshape(sample_size)]
-        if filenames_comparison is not None:
-            data_comp = data_comp[NN.kneighbors(data_ucr, return_distance=False).reshape(sample_size)]
-        for i in range(data_ucr.shape[0]):
-            axes[d,0].plot(data_ucr[i])
-        for i in range(data_raw.shape[0]):
-            axes[d,1].plot(data_raw[i])
-        if filenames_comparison is not None:
-            for i in range(data_comp.shape[0]):
-                axes[d,2].plot(data_comp[i])
+import analysis
+import matplotlib.pyplot as plt
+from gesture_normalization import clean_data_stretched
+def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfilename=None):
+    DATA_PATH = "NormalizationData\\OriginalDS-allRaw\\"
+    gestures_data = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH) for f in filenames]
+    results_length = []
+    results_x = []
+    results_y = []
+    results_z = []
+    for l in lengths:
+        classification,x,y,z = clean_data_stretched(gestures_data, size=l, rolling_average=False)
+        classification = pd.factorize(classification)[0]
+        classification = classification.reshape((classification.shape[0],1))
+        for r in range(runs):
+            results_length.append(l)
+            x_result = analysis.NN(np.concatenate((classification,x), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.8,seed=seed+r)
+            results_x.append(x_result)
+            y_result = analysis.NN(np.concatenate((classification,y), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.8,seed=seed+r)
+            results_y.append(y_result)
+            z_result = analysis.NN(np.concatenate((classification,z), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.8,seed=seed+r)
+            results_z.append(z_result)
+    if outfilename is not None:
+        out_file = open(outfilename, "w")
+        out_file.write("TimeSeriesLength,AccuracyX,AccuracyY,AccuracyZ\n")
+        for i in range(len(results_length)):
+            out_file.write(str(results_length[i])+","+str(results_x[i])+","+str(results_y[i])+","+str(results_z[i])+"\n")
+        out_file.close()
+    fig, axes = plt.subplots(nrows=3,ncols=1, sharex=True, sharey=True)
+    fig.set_size_inches(3, 7)
+    axes[0].scatter(results_length, results_x)
+    axes[1].scatter(results_length, results_y)
+    axes[2].scatter(results_length, results_z)
     fig.tight_layout()
     fig.show()
 
-def compare_closest_dtw(filenames_ucr, filenames_raw,normalizer = None,sample_size=3, seed=8235416):
-    fig, axes = plt.subplots(nrows=3,ncols=2, sharex=True, sharey=True)
-    fig.set_size_inches(10, 7)
-    for d,dim in enumerate(['x','y','z']):
-        data_ucr = np.array(pd.read_csv(filenames_ucr[dim]))[:,1:]
-        data_raw = np.array(pd.read_csv(filenames_raw[dim]))[:,1:]
-        if normalizer is not None:
-            scaler = normalizer()
-            scaler.fit(data_raw)
-            data_raw = scaler.transform(data_raw)
-        np.random.seed(seed)
-        data_ucr = data_ucr[np.random.choice(data_ucr.shape[0], size=sample_size ,replace=True)]
-        NN = NearestNeighbors(n_neighbors=1, metric=)
-        NN.fit(data_raw)
-        data_raw = data_raw[NN.kneighbors(data_ucr, return_distance=False).reshape(sample_size)]
-        for i in range(data_ucr.shape[0]):
-            axes[d,0].plot(data_ucr[i])
-        for i in range(data_raw.shape[0]):
-            axes[d,1].plot(data_raw[i])
-    fig.tight_layout()
-    fig.show()
+#if __name__ == '__main__':
+lengths = [5,10,20,30,40,50,60,70,80,90,100,150,200,250,300,350,400,450,500,600,700,800,900,1000]
+gridsearch_length(lengths, 50, metric="euclidean",seed=666, outfilename="Results\\Gestures\\AccuracyLengthEuclidean.csv")
 
-analysis(gesture_filenames_stretched['x'], RowStandardScaler, metric="euclidean", w=4, test_prop=0.8)
-#compare_ucr(gesture_filenames_UCR, gesture_filenames_stretched, normalizer=RowStandardScaler, sample_size=3,seed=122905)
-compare_closest(gesture_filenames_UCR, gesture_filenames_stretchedavg, filenames_comparison=gesture_filenames_stretched, normalizer=RowStandardScaler, sample_size=3,seed=5)
 
-data_raw = np.array(pd.read_csv(filenames_raw['x']))[:,1:]#
-
-classification,x,y,z
-sample = np.random.choice(x.shape[0], size=sample_size ,replace=True)
-x_sample = x[sample]
 

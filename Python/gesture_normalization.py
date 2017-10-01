@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 DATA_PATH = "NormalizationData\\OriginalDS-all\\"
 DATA_PATH_OUT = "NormalizationData\\GesturesRaw\\"
@@ -158,23 +159,7 @@ def main():  ### Stretched
     classification,x,y,z = clean_data_timenormal(gestures_data, size=315, rolling_average=False)
     out_data(classification,x,y,z,DATA_PATH_OUT + "TimeNormal")
 
-main()    
-
-#classification,x,y,z = clean_data(gestures_data)
-classification,x,y,z = clean_data_stretched(gestures_data, size=315, rolling_average=True)
-#classification,x,y,z = clean_data_timenormal(gestures_data, size=315)
-out_data(classification,x,y,z,DATA_PATH_OUT + "Stretched")
-
-# plot the times
-for i in range(len(gestures_data)):
-    plt.plot(time[i], y[i])
-plt.show()
-
-# plot the times
-for i in range(6,8):
-    plt.plot(x[i])
-plt.show()
-
+#main()    
 
 
 

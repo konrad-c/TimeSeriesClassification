@@ -174,8 +174,9 @@ This dataset, comprised of three dimensions X, Y and Z, can be investigated as t
 \section{Further Work}
 
 Due to only two datasets being available to this research, our findings are localised to the datasets discussed.
-While our conclusions regarding time series length and normalization techniques with regard to these datasets hold true, the nature of the data is important in relation to classification accuracy.
-Due to this, more work is required to understand the effect of time series length normalization and scalar normalization on other data from the UCR Time Series Classification Archive [1]. 
+While our conclusions regarding time series length and normalization techniques with respect to these datasets hold true, the nature of the data is important in relation to classification accuracy.
+Due to this, more work is required to understand the effect of time series length normalization and scalar normalization on other data from both the UCR Time Series Classification Archive [1] and other data.
+Additionally further investigation is required into multivariate time series. 
 As discussed in this report, the information loss associated with the reduction of time series length impacts the classification accuracy (both positively and negatively).
 More research is required to find more intricate models for finding minimum time series representations which minimise information loss.
 
