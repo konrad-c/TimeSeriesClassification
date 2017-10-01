@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.metrics import classification_report
+import multiprocessing as mp
 
 class RowStandardScaler:
     def __init__(self):
@@ -59,11 +60,9 @@ def LB_Keogh(s1,s2,r):
             LB_sum=LB_sum+(i-lower_bound)**2
     return np.sqrt(LB_sum)
     
-def NN_DTW(x_train, y_train, x_test, y_test, w):
-    if w is None:
-        w = x_train.shape[1]
+def NN_predict(start,finish,x_train, y_train, x_test, w):
     predictions = []
-    for i in range(x_test.shape[0]):
+    for i in range(start, finish):
         test_i = x_test[i]
         min_dist = float('inf')
         closest_seq = None
@@ -75,8 +74,27 @@ def NN_DTW(x_train, y_train, x_test, y_test, w):
                     min_dist = dist
                     closest_seq = j
         predictions.append(y_train[closest_seq])
-    results = float(np.where(y_test == np.array(predictions))[0].shape[0])/float(np.array(predictions).shape[0])
-    #print(classification_report(y_test, predictions))
+    return predictions
+    
+def NN_DTW(x_train, y_train, x_test, y_test, w):
+    if w is None:
+        w = x_train.shape[1]
+    num_proc = mp.cpu_count()
+    recs_per_proc = x_test.shape[0]//num_proc
+    processes = []
+    pool = mp.Pool(processes=num_proc)
+    for i in range(num_proc):
+        left = i*recs_per_proc
+        right = (i+1)*recs_per_proc if i != num_proc - 1 else x_test.shape[0]
+        processes.append(pool.apply_async(NN_predict, args=(left,right,x_train,y_train,x_test,w,)))
+    
+    results = [p.get() for p in processes]
+    predictions = [item for sublist in results for item in sublist]
+    predictions = np.array(predictions)
+    results = float(np.where(y_test == predictions)[0].shape[0])/float(predictions.shape[0])
+    ## Do cleanup
+    pool.close()
+    pool.join()
     return results
 
 def NN_accuracy(filename, normalizer=None, metric="euclidean", w=None, test_prop=0.5, seed=2082):

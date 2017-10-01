@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.metrics import classification_report
+import multiprocessing as mp
+import os
 
 wafer_stretched = "NormalizationData/WaferClean/StretchedWafer.csv"
 wafer_stretched_avg = "NormalizationData/WaferClean/StretchedAvgWafer.csv"
@@ -109,22 +111,44 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
         classification = classification.reshape((classification.shape[0],1))
         for r in range(runs):
             results_length.append(l)
-            acc = NN(np.concatenate((classification,x), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.86,seed=seed+r)
+            acc = analysis.NN(np.concatenate((classification,x), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.86,seed=seed+r)
             results.append(acc)
+            print("Length:",str(l),"Accuracy:",acc)
     if outfilename is not None:
         out_file = open(outfilename, "w")
         out_file.write("TimeSeriesLength,Accuracy\n")
         for i in range(len(results_length)):
             out_file.write(str(results_length[i])+","+str(results[i])+"\n")
         out_file.close()
-    fig, axes = plt.subplots(nrows=1,ncols=1, sharex=True, sharey=True)
-    fig.set_size_inches(4, 4)
-    axes.scatter(results_length, results)
-    fig.tight_layout()
-    fig.show()
+    #fig, axes = plt.subplots(nrows=1,ncols=1, sharex=True, sharey=True)
+    #fig.set_size_inches(4, 4)
+    #axes.scatter(results_length, results)
+    #fig.tight_layout()
+    #fig.show()
 
-lengths = [1,2,3,4]#[5,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,220,240,260,280,300]
-gridsearch_length(lengths, 50, metric="euclidean",seed=666, outfilename="Results\\Wafer\\AccuracyLengthEuclideanSmall.csv")
+def get_data(metric, out_filename, runs, window, lengths):
+    gridsearch_length(lengths, runs, metric=metric,w=window,seed=666, outfilename="Results\\Wafer\\"+out_filename)
+
+def get_data_parallel(metric, out_filename, runs, window, lengths):
+    num_proc = mp.cpu_count()
+    assert len(lengths) % num_proc == 0, "Length must be multiple of " + str(num_proc)
+    jobs_per_proc = len(lengths)//num_proc
+    jobs = []
+    for i in range(num_proc):
+        #gridsearch_length(lengths[jobs_per_proc*i:jobs_per_proc*(i+1)], runs, metric=metric, seed=666, outfilename="Results\\Cricket\\Process_"+str(i)+out_filename)
+        p = mp.Process(target=gridsearch_length, args=(lengths[jobs_per_proc*i:jobs_per_proc*(i+1)], runs, metric, window, 666, "Results\\Wafer\\Process_"+str(i)+out_filename,))
+        jobs.append(p)
+        p.start()
+    for j in jobs:
+        j.join()
+        print(str(j.name)+".exitcode = "+str(j.exitcode))
+
+if __name__ == '__main__':
+    #get_data_parallel("DTW", "AccuracyLengthDTW_MaxWindow.csv", 8, None, [5,10,20,40,60,80,100,125,150,175,200,225,250,275,300,325])
+    get_data("DTW", "AccuracyLengthDTWPARALLEL_MaxWindow.csv", 8, None, [225,250,275,300,325])#[60,80,100,125,150,175,200,225,250,275,300,325]
+
+#lengths = [1,2,3,4]#[5,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,220,240,260,280,300]
+#gridsearch_length(lengths, 50, metric="euclidean",seed=666, outfilename="Results\\Wafer\\AccuracyLengthEuclideanSmall.csv")
 #dimension = 'z'
 #gridsearch_normal(wafer_UCR, wafer_stretched, 20, metric="euclidean",seed=2082)
 #compare_closest(wafer_UCR, wafer_stretched,normalizer = analysis.RowStandardScaler, measure='euclidean',sample_size=2, seed=5)

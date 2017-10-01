@@ -165,12 +165,12 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
     #fig.tight_layout()
     #fig.show()
 
-def get_data(metric, out_filename, runs, lengths):
-    gridsearch_length(lengths, runs, metric=metric,seed=666, outfilename="Results\\Cricket\\"+out_filename)
+def get_data(metric, out_filename, runs, window, lengths):
+    gridsearch_length(lengths, runs, metric=metric, w=window,seed=666, outfilename="Results\\Cricket\\"+out_filename)
 
 def get_data_parallel(metric, out_filename, runs, window, lengths):
     num_proc = mp.cpu_count()
-    assert len(lengths) % 8 == 0, "Length must be multiple of " + str(num_proc)
+    assert len(lengths) % num_proc == 0, "Length must be multiple of " + str(num_proc)
     jobs_per_proc = len(lengths)//num_proc
     jobs = []
     for i in range(num_proc):
@@ -183,7 +183,8 @@ def get_data_parallel(metric, out_filename, runs, window, lengths):
         print(str(j.name)+".exitcode = "+str(j.exitcode))
 
 if __name__ == '__main__':
-    get_data_parallel("DTW", "AccuracyLengthDTW_MaxWindow.csv", 8, None, [50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
+    get_data("DTW", "AccuracyLengthDTW_MaxWindow_SMALL.csv", 8, None, [1,2,3,4,5,10,20,30,40])#[50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
+    #get_data("DTW", "AccuracyLengthDTWPARALLEL_MaxWindow.csv", 1, None, [10])
 #get_data("euclidean", "AccuracyLengthEuclidean.csv", 100, [5,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,1500,3000])
 #get_data("DTW", "AccuracyLengthDTW.csv", 5, [50,100,200,300,400,500,600,800])
 
