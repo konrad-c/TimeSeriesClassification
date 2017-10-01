@@ -29,19 +29,21 @@ class RowMinMaxScaler:
     
     def transform(self, X):
         return (X - self.minimum)/(self.maximum - self.minimum)
+
 ###
 ### Sourced from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
 ###  
 def DTWDistance(s1, s2,w=1):
     w = max(w, abs(len(s1)-len(s2)))
-    DTW = np.ones((s1.shape[0]+1, s2.shape[0]+1), dtype=np.float)*np.inf
+    DTW = np.ones((s1.shape[0]+1, s2.shape[0]+1), dtype=np.int)*np.inf
     DTW[0,0] = 0
-    dists = np.power(s1.reshape(s1.shape[0],1) - s2, 2)
-
-    for i in range(s1.shape[0]):
-        dists[i] = np.power(s1[i] - s2, 2)
-        for j in range(max(0, i-w), min(s2.shape[0], i+w)):
-            DTW[i+1, j+1] = dists[i][j] + min(DTW[i, j+1],DTW[i+1, j], DTW[i, j])
+    DTW[1:,1:] = np.power(s1.reshape(s1.shape[0],1) - s2, 2)
+    
+    r, c = np.array(DTW.shape)-1
+    for a in range(1, r+c):
+        I = np.arange(max(0, a-c), min(r, a))
+        J = I[::-1] + a - min(r, a) - max(0, a-c)
+        DTW[I+1, J+1] += np.minimum(np.minimum(DTW[I, J], DTW[I, J+1]), DTW[I+1, J])
     return np.sqrt(DTW[-1, -1])
 
 ###
@@ -51,8 +53,8 @@ def LB_Keogh(s1,s2,r):
     LB_sum=0
     for ind,i in enumerate(s1):
 
-        lower_bound=min(s2[(ind-r if ind-r>=0 else 0):(ind+r)])
-        upper_bound=max(s2[(ind-r if ind-r>=0 else 0):(ind+r)])
+        lower_bound=np.min(s2[max(ind-r, 0):(ind+r)])
+        upper_bound=np.max(s2[max(ind-r, 0):(ind+r)])
 
         if i>upper_bound:
             LB_sum=LB_sum+(i-upper_bound)**2

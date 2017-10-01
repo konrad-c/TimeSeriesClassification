@@ -4,21 +4,25 @@ library(gridExtra)
 
 setwd("C:/Users/kocyb_000/Documents/Uni/TimeSeriesClassification/Python/Results")
 
-# Euclidean Length 
-cricket <- read.csv("Cricket/AccuracyLengthEuclidean.csv")
-cricket <- read.csv("Cricket/AccuracyLengthDTW_MaxWindow.csv")
-cricket$TimeSeriesLength <- factor(cricket$TimeSeriesLength)
+# Cricket
+data <- read.csv("Cricket/AccuracyLengthEuclidean.csv")
+data <- read.csv("Cricket/AccuracyLengthDTW_MaxWindow.csv")
+data <- data[-(data$TimeSeriesLength == 10),]
+data$TimeSeriesLength <- factor(data$TimeSeriesLength)
 
-plotXYZ <- function(df, metric){
+# Gestures
+data <- read.csv("Gestures/AccuracyLengthEuclidean.csv")
+
+plotXYZ <- function(df, name, metric){
   results <- lapply(c(1,2,3), function(x){
     axis <- c("AccuracyX","AccuracyY","AccuracyZ")
-    data_name <- c("CricketX -","CricketY -","CricketZ -")
+    data_name <- c(paste0(name,"X -"),paste0(name,"Y -"),paste0(name,"Z -"))
     title_val <- paste0(data_name[x], " Classification Accuracy (",metric,") vs. Time Series Length")
     return(
       ggplot(df, aes_string(x="TimeSeriesLength", y=axis[x])) +
-        geom_boxplot() +
-        #geom_point() +
-        #geom_smooth(method="loess") +
+        #geom_boxplot() +
+        geom_point() +
+        geom_smooth(method="loess") +
         #scale_y_continuous(limits=c(0,1)) +
         theme_bw() +
         labs(
@@ -31,7 +35,8 @@ plotXYZ <- function(df, metric){
   return(results)
 }
 
-plots = plotXYZ(cricket,"Euclidean")
+plots = plotXYZ(data, "Cricket","DTW")
+plots = plotXYZ(data, "Gestures","Euclidean")
 plots[[1]]
 plots[[2]]
 plots[[3]]

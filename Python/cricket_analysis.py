@@ -151,6 +151,7 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
             results_y.append(y_result)
             z_result = analysis.NN(np.concatenate((classification,z), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.5,seed=seed+r)
             results_z.append(z_result)
+            print(str(l)+","+str(x_result)+","+str(y_result)+","+str(z_result))
     if outfilename is not None:
         out_file = open(outfilename, "w")
         out_file.write("TimeSeriesLength,AccuracyX,AccuracyY,AccuracyZ\n")
@@ -182,8 +183,11 @@ def get_data_parallel(metric, out_filename, runs, window, lengths):
         j.join()
         print(str(j.name)+".exitcode = "+str(j.exitcode))
 
-if __name__ == '__main__':
-    get_data("DTW", "AccuracyLengthDTW_MaxWindow_SMALL.csv", 8, None, [1,2,3,4,5,10,20,30,40])#[50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
+import time
+#if __name__ == '__main__':
+before = time.time()
+get_data("DTW", "AccuracyLengthDTW_TEST.csv", 8, None, [40])#[50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
+print("took",str(time.time()-before))
     #get_data("DTW", "AccuracyLengthDTWPARALLEL_MaxWindow.csv", 1, None, [10])
 #get_data("euclidean", "AccuracyLengthEuclidean.csv", 100, [5,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,1500,3000])
 #get_data("DTW", "AccuracyLengthDTW.csv", 5, [50,100,200,300,400,500,600,800])
