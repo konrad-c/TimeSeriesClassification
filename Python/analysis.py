@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.metrics import classification_report
 import multiprocessing as mp
+import Cython.build.CDTW as CDTW
 
 class RowStandardScaler:
     def __init__(self):
@@ -62,7 +63,8 @@ def LB_Keogh(s1,s2,r):
             LB_sum=LB_sum+(i-lower_bound)**2
     return np.sqrt(LB_sum)
     
-def NN_predict(start,finish,x_train, y_train, x_test, w):
+def NN_predict(start, finish, x_train, y_train, x_test, w):
+    """
     predictions = []
     for i in range(start, finish):
         test_i = x_test[i]
@@ -76,11 +78,14 @@ def NN_predict(start,finish,x_train, y_train, x_test, w):
                     min_dist = dist
                     closest_seq = j
         predictions.append(y_train[closest_seq])
-    return predictions
+    """
+    predictions = CDTW.NN_predict(x_train,y_train,x_test,w)
+    return np.asarray(predictions)
     
 def NN_DTW(x_train, y_train, x_test, y_test, w):
     if w is None:
         w = x_train.shape[1]
+    """
     num_proc = mp.cpu_count()
     recs_per_proc = x_test.shape[0]//num_proc
     processes = []
@@ -88,15 +93,16 @@ def NN_DTW(x_train, y_train, x_test, y_test, w):
     for i in range(num_proc):
         left = i*recs_per_proc
         right = (i+1)*recs_per_proc if i != num_proc - 1 else x_test.shape[0]
-        processes.append(pool.apply_async(NN_predict, args=(left,right,x_train,y_train,x_test,w,)))
+        processes.append(pool.apply_async(NN_predict, args=(left,right,x_train,y_train.astype(int),x_test,w,)))
     
     results = [p.get() for p in processes]
     predictions = [item for sublist in results for item in sublist]
-    predictions = np.array(predictions)
+    """
+    predictions = CDTW.NN_predict(x_train,y_train.astype(int),x_test,w)
     results = float(np.where(y_test == predictions)[0].shape[0])/float(predictions.shape[0])
     ## Do cleanup
-    pool.close()
-    pool.join()
+    #pool.close()
+    #pool.join()
     return results
 
 def NN_accuracy(filename, normalizer=None, metric="euclidean", w=None, test_prop=0.5, seed=2082):

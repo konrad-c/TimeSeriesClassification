@@ -6,8 +6,11 @@ setwd("C:/Users/kocyb_000/Documents/Uni/TimeSeriesClassification/Python/Results"
 
 # Cricket
 data <- read.csv("Cricket/AccuracyLengthEuclidean.csv")
+data <- data[as.numeric(data$TimeSeriesLength) <= 1000,]
+
 data <- read.csv("Cricket/AccuracyLengthDTW_MaxWindow.csv")
-data <- data[-(data$TimeSeriesLength == 10),]
+
+data$Group = factor(data$TimeSeriesLength)
 data$TimeSeriesLength <- factor(data$TimeSeriesLength)
 
 # Gestures
@@ -19,10 +22,10 @@ plotXYZ <- function(df, name, metric){
     data_name <- c(paste0(name,"X -"),paste0(name,"Y -"),paste0(name,"Z -"))
     title_val <- paste0(data_name[x], " Classification Accuracy (",metric,") vs. Time Series Length")
     return(
-      ggplot(df, aes_string(x="TimeSeriesLength", y=axis[x])) +
-        #geom_boxplot() +
-        geom_point() +
-        geom_smooth(method="loess") +
+      ggplot(df, aes_string(x="TimeSeriesLength", y=axis[x], group="Group")) +
+        geom_boxplot() +
+        #geom_point() +
+        #geom_smooth(method="loess") +
         #scale_y_continuous(limits=c(0,1)) +
         theme_bw() +
         labs(
@@ -35,7 +38,7 @@ plotXYZ <- function(df, name, metric){
   return(results)
 }
 
-plots = plotXYZ(data, "Cricket","DTW")
+plots = plotXYZ(data, "Cricket","Euclidean")
 plots = plotXYZ(data, "Gestures","Euclidean")
 plots[[1]]
 plots[[2]]
@@ -44,12 +47,15 @@ grid.arrange(plots[[1]],plots[[2]],plots[[3]])
 
 # Wafer
 wafer <- read.csv("Wafer/AccuracyLengthEuclidean.csv")
+wafer <- wafer[as.numeric(wafer$TimeSeriesLength) > 3,]
+
 wafer <- read.csv("Wafer/AccuracyLengthDTW.csv")
 
+wafer$Group = factor(wafer$TimeSeriesLength)
+
 # WAFER Boxplot
-wafer$TimeSeriesLength = factor(wafer$TimeSeriesLength)
-ggplot(wafer, aes(x=TimeSeriesLength, y=Accuracy)) +
-  geom_boxplot() +
+ggplot(wafer, aes(x=TimeSeriesLength, y=Accuracy, group=Group)) +
+  geom_boxplot(width=6) +
   theme_bw() +
   #scale_y_continuous(limits=c(0.8,1)) +
   labs(

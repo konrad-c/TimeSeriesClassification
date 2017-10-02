@@ -183,11 +183,11 @@ def get_data_parallel(metric, out_filename, runs, window, lengths):
         j.join()
         print(str(j.name)+".exitcode = "+str(j.exitcode))
 
-import time
-#if __name__ == '__main__':
-before = time.time()
-get_data("DTW", "AccuracyLengthDTW_TEST.csv", 8, None, [40])#[50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
-print("took",str(time.time()-before))
+if __name__ == '__main__':
+    import time
+    before = time.time()
+    get_data("DTW", "AccuracyLengthDTW_TEST.csv", 1, None, [20])#[50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800])
+    print("Took",str(time.time()-before),"s")
     #get_data("DTW", "AccuracyLengthDTWPARALLEL_MaxWindow.csv", 1, None, [10])
 #get_data("euclidean", "AccuracyLengthEuclidean.csv", 100, [5,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,1500,3000])
 #get_data("DTW", "AccuracyLengthDTW.csv", 5, [50,100,200,300,400,500,600,800])
