@@ -36,8 +36,13 @@ class RowMinMaxScaler:
 ###  
 def DTWDistance(s1, s2,w=1):
     w = max(w, abs(len(s1)-len(s2)))
-    DTW = np.ones((s1.shape[0]+1, s2.shape[0]+1), dtype=np.int)*np.inf
+    DTW = np.ones((s1.shape[0], s2.shape[0]), dtype=np.double)*np.inf
     DTW[0,0] = 0
+    for i in range(1,s1.shape[0]):
+        for j in range(1,s2.shape[0]):
+            DTW[i,j] = (s1[i]-s2[j])**2 + min(DTW[i-1][j],DTW[i-1][j-1],DTW[i][j-1])
+    return np.sqrt(DTW[-1, -1])
+    """
     DTW[1:,1:] = np.power(s1.reshape(s1.shape[0],1) - s2, 2)
     
     r, c = np.array(DTW.shape)-1
@@ -45,17 +50,19 @@ def DTWDistance(s1, s2,w=1):
         I = np.arange(max(0, a-c), min(r, a))
         J = I[::-1] + a - min(r, a) - max(0, a-c)
         DTW[I+1, J+1] += np.minimum(np.minimum(DTW[I, J], DTW[I, J+1]), DTW[I+1, J])
-    return np.sqrt(DTW[-1, -1])
+    """
 
 ###
 ### Sourced from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
 ###
 def LB_Keogh(s1,s2,r):
     LB_sum=0
-    for ind,i in enumerate(s1):
+    for ind in range(s1.shape[0]):
+        i = s1[ind]
+    #for ind,i in enumerate(s1):
 
-        lower_bound=np.min(s2[max(ind-r, 0):(ind+r)])
-        upper_bound=np.max(s2[max(ind-r, 0):(ind+r)])
+        lower_bound=np.min(s2[max(ind-r, 0):min(s2.shape[0],(ind+r))])
+        upper_bound=np.max(s2[max(ind-r, 0):min(s2.shape[0],(ind+r))])
 
         if i>upper_bound:
             LB_sum=LB_sum+(i-upper_bound)**2
@@ -80,7 +87,7 @@ def NN_predict(start, finish, x_train, y_train, x_test, w):
         predictions.append(y_train[closest_seq])
     """
     predictions = CDTW.NN_predict(x_train,y_train,x_test,w)
-    return np.asarray(predictions)
+    return predictions
     
 def NN_DTW(x_train, y_train, x_test, y_test, w):
     if w is None:
@@ -97,6 +104,7 @@ def NN_DTW(x_train, y_train, x_test, y_test, w):
     
     results = [p.get() for p in processes]
     predictions = [item for sublist in results for item in sublist]
+    predictions = np.array(predictions)
     """
     predictions = CDTW.NN_predict(x_train,y_train.astype(int),x_test,w)
     results = float(np.where(y_test == predictions)[0].shape[0])/float(predictions.shape[0])

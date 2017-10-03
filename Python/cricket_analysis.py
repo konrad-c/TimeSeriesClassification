@@ -183,6 +183,50 @@ def get_data_parallel(metric, out_filename, runs, window, lengths):
         j.join()
         print(str(j.name)+".exitcode = "+str(j.exitcode))
 
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
+from sklearn.metrics import classification_report
+import multiprocessing as mp
+import Cython.build.CDTW as CDTW
+from cricket_normalization import clean_data_stretched
+import analysis
+DATA_PATH = "NormalizationData\\CricketDataRaw\\"
+cricket_data = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH) for f in filenames]
+l=10
+classification,x,y,z = clean_data_stretched(cricket_data, size=l, rolling_average=False)
+classification = pd.factorize(classification)[0]
+classification = classification.reshape((classification.shape[0],1))
+data = np.concatenate((classification,x), axis=1)
+test_prop = 0.5
+train, test = train_test_split(data, test_size=test_prop)
+y_train = np.array(train[:,0])
+x_train = np.array(train[:,1:])
+y_test= np.array(test[:,0])
+x_test = np.array(test[:,1:])
+w = x_test.shape[1]
+
+import time
+before = time.time()
+predictions = CDTW.NN_predict(x_train,y_train.astype(int),x_test[0:50],w)
+print("Sequential took",str(time.time()-before))
+
+before = time.time()
+predictions = CDTW.NN_predict_parallel(x_train,y_train.astype(int),x_test[0:50],w)
+print("Parallel took",str(time.time()-before))
+
+print(predictions)
+results = float(np.where(y_test == predictions)[0].shape[0])/float(predictions.shape[0])
+print(results)
+
+predictions = analysis.NN_predict(0, x_test.shape[0], x_train, y_train, x_test, w)
+print(predictions)
+results = float(np.where(y_test == predictions)[0].shape[0])/float(predictions.shape[0])
+print(results)
+
 if __name__ == '__main__':
     import time
     before = time.time()

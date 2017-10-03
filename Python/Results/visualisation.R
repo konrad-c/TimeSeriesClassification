@@ -15,6 +15,7 @@ data$TimeSeriesLength <- factor(data$TimeSeriesLength)
 
 # Gestures
 data <- read.csv("Gestures/AccuracyLengthEuclidean.csv")
+data <- read.csv("Gestures/AccuracyLengthDTW_SMALL_MaxWindow.csv")
 
 plotXYZ <- function(df, name, metric){
   results <- lapply(c(1,2,3), function(x){
@@ -39,7 +40,7 @@ plotXYZ <- function(df, name, metric){
 }
 
 plots = plotXYZ(data, "Cricket","Euclidean")
-plots = plotXYZ(data, "Gestures","Euclidean")
+plots = plotXYZ(data, "Gestures","DTW")
 plots[[1]]
 plots[[2]]
 plots[[3]]

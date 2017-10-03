@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.metrics import classification_report
 import os
+import time
 
 gesture_filenames = {
     'x': "NormalizationData/GesturesRaw/GesturesX.csv",
@@ -52,12 +53,13 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
     results_x = []
     results_y = []
     results_z = []
+    print("TimeSeriesLength,AccuracyX,AccuracyY,AccuracyZ,TimeTaken")
     for l in lengths:
         classification,x,y,z = clean_data_stretched(gestures_data, size=l, rolling_average=False)
         classification = pd.factorize(classification)[0]
         classification = classification.reshape((classification.shape[0],1))
-        print("TimeSeriesLength,AccuracyX,AccuracyY,AccuracyZ")
         for r in range(runs):
+            before = time.time()
             results_length.append(l)
             x_result = analysis.NN(np.concatenate((classification,x), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.8,seed=seed+r)
             results_x.append(x_result)
@@ -65,7 +67,7 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
             results_y.append(y_result)
             z_result = analysis.NN(np.concatenate((classification,z), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.8,seed=seed+r)
             results_z.append(z_result)
-            print(str(l)+","+str(x_result)+","+str(y_result)+","+str(z_result))
+            print(str(l)+","+str(x_result)+","+str(y_result)+","+str(z_result),str(time.time()-before))
     if outfilename is not None:
         out_file = open(outfilename, "w")
         out_file.write("TimeSeriesLength,AccuracyX,AccuracyY,AccuracyZ\n")
@@ -81,8 +83,8 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
     #fig.show()
 
 if __name__ == '__main__':
-    lengths = [5,10,20,30,40]#,50,60,70,80,90,100,150,200,250,300,350,400,450,500,600,700,800,900,1000]
-    gridsearch_length(lengths, 8, metric="DTW",seed=666, outfilename="Results\\Gestures\\AccuracyLengthDTW_SMALL_MaxWindow.csv")
+    lengths = [30,40]#[50,60,70,80,90,100,150,200,250,300,350,400,450,500,600,700,800,900,1000]
+    gridsearch_length(lengths, 1, metric="DTW",seed=666, outfilename="Results\\Gestures\\TESTAccuracyLengthDTW_SMALL_MaxWindow.csv")
 
 
 
