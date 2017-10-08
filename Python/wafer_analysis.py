@@ -99,21 +99,22 @@ def gridsearch_normal(filename_ucr, filename_comparison, runs, metric='euclidean
     
 from wafer_norm import raw_wafer
 #raw_wafer(filenames_normal, filenames_abnormal, stretch_length=None, rolling_average=False):
-def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfilename=None):
+def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfilename=None, use_cython=True):
     DATA_PATH = "NormalizationData\\waferRaw\\"
     wafer_normal = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH + "normal\\") for f in filenames]
     wafer_abnormal = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH + "abnormal\\") for f in filenames]
     results_length = []
     results = []
+    print("TimeSeriesLength,Accuracy")
     for l in lengths:
         classification,x = raw_wafer(wafer_normal, wafer_abnormal, stretch_length=l, rolling_average=False)
         classification = pd.factorize(classification)[0]
         classification = classification.reshape((classification.shape[0],1))
         for r in range(runs):
             results_length.append(l)
-            acc = analysis.NN(np.concatenate((classification,x), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.86,seed=seed+r)
+            acc = analysis.NN(np.concatenate((classification,x), axis=1),normalizer=analysis.RowStandardScaler,metric=metric,w=w,test_prop=0.86,seed=seed+r, use_cython=use_cython)
             results.append(acc)
-            print("Length:",str(l),"Accuracy:",acc)
+            print(str(l)+","+str(acc))
     if outfilename is not None:
         out_file = open(outfilename, "w")
         out_file.write("TimeSeriesLength,Accuracy\n")
@@ -126,27 +127,19 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
     #fig.tight_layout()
     #fig.show()
 
-def get_data(metric, out_filename, runs, window, lengths):
-    gridsearch_length(lengths, runs, metric=metric,w=window,seed=666, outfilename="Results\\Wafer\\"+out_filename)
-
-def get_data_parallel(metric, out_filename, runs, window, lengths):
-    num_proc = mp.cpu_count()
-    assert len(lengths) % num_proc == 0, "Length must be multiple of " + str(num_proc)
-    jobs_per_proc = len(lengths)//num_proc
-    jobs = []
-    for i in range(num_proc):
-        #gridsearch_length(lengths[jobs_per_proc*i:jobs_per_proc*(i+1)], runs, metric=metric, seed=666, outfilename="Results\\Cricket\\Process_"+str(i)+out_filename)
-        p = mp.Process(target=gridsearch_length, args=(lengths[jobs_per_proc*i:jobs_per_proc*(i+1)], runs, metric, window, 666, "Results\\Wafer\\Process_"+str(i)+out_filename,))
-        jobs.append(p)
-        p.start()
-    for j in jobs:
-        j.join()
-        print(str(j.name)+".exitcode = "+str(j.exitcode))
-
 if __name__ == '__main__':
+    lengths = [250]
+    gridsearch_length(lengths, 8, metric="DTW",w=None,seed=666, outfilename="Results\\Wafer\\CYTHONAccuracyLengthDTW_MaxWindow.csv", use_cython=True)
     #get_data_parallel("DTW", "AccuracyLengthDTW_MaxWindow.csv", 8, None, [5,10,20,40,60,80,100,125,150,175,200,225,250,275,300,325])
-    get_data("DTW", "AccuracyLengthDTWPARALLEL_MaxWindow.csv", 8, None, [225,250,275,300,325])#[60,80,100,125,150,175,200,225,250,275,300,325]
-
+    #lengths = [300,400,500]
+    #gridsearch_length(lengths, 8, metric="DTW",w=None,seed=666, outfilename="Results\\Wafer\\1LARGEAccuracyLengthDTW_MaxWindow.csv")
+    #lengths = [350,450,550]
+    #gridsearch_length(lengths, 8, metric="DTW",w=None,seed=666, outfilename="Results\\Wafer\\2LARGEAccuracyLengthDTW_MaxWindow.csv")
+    #lengths = [275,325,375,425,475,525]
+    #gridsearch_length(lengths, 8, metric="DTW",w=None,seed=666, outfilename="Results\\Wafer\\3LARGEAccuracyLengthDTW_MaxWindow.csv")
+    #lengths = [600,650,700]
+    #gridsearch_length(lengths, 8, metric="DTW",w=None,seed=666, outfilename="Results\\Wafer\\4LARGEAccuracyLengthDTW_MaxWindow.csv")
+    
 #lengths = [1,2,3,4]#[5,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,220,240,260,280,300]
 #gridsearch_length(lengths, 50, metric="euclidean",seed=666, outfilename="Results\\Wafer\\AccuracyLengthEuclideanSmall.csv")
 #dimension = 'z'

@@ -83,8 +83,11 @@ def gridsearch_length(lengths, runs, metric='euclidean', w=1, seed=2017, outfile
     #fig.show()
 
 if __name__ == '__main__':
-    lengths = [30,40]#[50,60,70,80,90,100,150,200,250,300,350,400,450,500,600,700,800,900,1000]
-    gridsearch_length(lengths, 1, metric="DTW",seed=666, outfilename="Results\\Gestures\\TESTAccuracyLengthDTW_SMALL_MaxWindow.csv")
-
+    #lengths = [60,70,80,90]
+    #gridsearch_length(lengths, 8, metric="DTW",seed=666, outfilename="Results\\Gestures\\1AccuracyLengthDTW_MaxWindow.csv")
+    #lengths = [110,120,130,140]
+    #gridsearch_length(lengths, 8, metric="DTW",seed=666, outfilename="Results\\Gestures\\2AccuracyLengthDTW_MaxWindow.csv")
+    lengths = [50,100]
+    gridsearch_length(lengths, 8, metric="DTW",seed=666, outfilename="Results\\Gestures\\3AccuracyLengthDTW_MaxWindow.csv")
 
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-DATA_PATH = "NormalizationData\\OriginalDS-all\\"
+DATA_PATH = "NormalizationData\\OriginalDS-allRaw\\"
 DATA_PATH_OUT = "NormalizationData\\GesturesRaw\\"
 gestures_data = [os.path.join(dp, f) for dp, dn, filenames in os.walk(DATA_PATH) for f in filenames]
 

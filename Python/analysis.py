@@ -35,14 +35,14 @@ class RowMinMaxScaler:
 ### Sourced from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
 ###  
 def DTWDistance(s1, s2,w=1):
-    w = max(w, abs(len(s1)-len(s2)))
-    DTW = np.ones((s1.shape[0], s2.shape[0]), dtype=np.double)*np.inf
-    DTW[0,0] = 0
+    """
     for i in range(1,s1.shape[0]):
         for j in range(1,s2.shape[0]):
             DTW[i,j] = (s1[i]-s2[j])**2 + min(DTW[i-1][j],DTW[i-1][j-1],DTW[i][j-1])
-    return np.sqrt(DTW[-1, -1])
     """
+    w = max(w, abs(len(s1)-len(s2)))
+    DTW = np.ones((s1.shape[0]+1, s2.shape[0]+1), dtype=np.double)*np.inf
+    DTW[0,0] = 0
     DTW[1:,1:] = np.power(s1.reshape(s1.shape[0],1) - s2, 2)
     
     r, c = np.array(DTW.shape)-1
@@ -50,7 +50,7 @@ def DTWDistance(s1, s2,w=1):
         I = np.arange(max(0, a-c), min(r, a))
         J = I[::-1] + a - min(r, a) - max(0, a-c)
         DTW[I+1, J+1] += np.minimum(np.minimum(DTW[I, J], DTW[I, J+1]), DTW[I+1, J])
-    """
+    return np.sqrt(DTW[-1, -1])
 
 ###
 ### Sourced from http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
@@ -71,7 +71,6 @@ def LB_Keogh(s1,s2,r):
     return np.sqrt(LB_sum)
     
 def NN_predict(start, finish, x_train, y_train, x_test, w):
-    """
     predictions = []
     for i in range(start, finish):
         test_i = x_test[i]
@@ -85,11 +84,10 @@ def NN_predict(start, finish, x_train, y_train, x_test, w):
                     min_dist = dist
                     closest_seq = j
         predictions.append(y_train[closest_seq])
-    """
-    predictions = CDTW.NN_predict(x_train,y_train,x_test,w)
-    return predictions
+    #predictions = CDTW.NN_predict(x_train,y_train,x_test,w)
+    return np.array(predictions)
     
-def NN_DTW(x_train, y_train, x_test, y_test, w):
+def NN_DTW(x_train, y_train, x_test, y_test, w, use_cython=True):
     if w is None:
         w = x_train.shape[1]
     """
@@ -106,7 +104,10 @@ def NN_DTW(x_train, y_train, x_test, y_test, w):
     predictions = [item for sublist in results for item in sublist]
     predictions = np.array(predictions)
     """
-    predictions = CDTW.NN_predict(x_train,y_train.astype(int),x_test,w)
+    if use_cython:
+        predictions = CDTW.NN_predict(x_train,y_train.astype(int),x_test,w)
+    else:
+        predictions = NN_predict(0, x_test.shape[0], x_train, y_train.astype(int), x_test, w)
     results = float(np.where(y_test == predictions)[0].shape[0])/float(predictions.shape[0])
     ## Do cleanup
     #pool.close()
@@ -119,7 +120,7 @@ def NN_accuracy(filename, normalizer=None, metric="euclidean", w=None, test_prop
     result = NN(np.array(data), normalizer, metric, w, test_prop, seed)
     return result
 
-def NN(data, normalizer=None, metric="euclidean", w=None, test_prop=0.5, seed=2082):
+def NN(data, normalizer=None, metric="euclidean", w=None, test_prop=0.5, seed=2082, use_cython=True):
     np.random.seed(seed)
     train, test = train_test_split(data, test_size=test_prop)
     y_train = np.array(train[:,0])
@@ -132,7 +133,7 @@ def NN(data, normalizer=None, metric="euclidean", w=None, test_prop=0.5, seed=20
         x_train = scaler.transform(x_train)
         x_test = scaler.transform(x_test)
     if metric == "DTW":
-        result = NN_DTW(x_train, y_train, x_test, y_test, w)
+        result = NN_DTW(x_train, y_train, x_test, y_test, w, use_cython)
     else:
         classifier = KNeighborsClassifier(n_neighbors=1, metric='euclidean')
         classifier.fit(x_train, y_train)

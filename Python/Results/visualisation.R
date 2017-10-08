@@ -3,20 +3,17 @@ library(reshape2)
 library(gridExtra)
 
 setwd("C:/Users/kocyb_000/Documents/Uni/TimeSeriesClassification/Python/Results")
+#setwd("E:/Documents/Uni/TimeSeriesClassification/Python/Results")
 
 # Cricket
 data <- read.csv("Cricket/AccuracyLengthEuclidean.csv")
-data <- data[as.numeric(data$TimeSeriesLength) <= 1000,]
-
 data <- read.csv("Cricket/AccuracyLengthDTW_MaxWindow.csv")
-
-data$Group = factor(data$TimeSeriesLength)
-data$TimeSeriesLength <- factor(data$TimeSeriesLength)
 
 # Gestures
 data <- read.csv("Gestures/AccuracyLengthEuclidean.csv")
-data <- read.csv("Gestures/AccuracyLengthDTW_SMALL_MaxWindow.csv")
+data <- read.csv("Gestures/AccuracyLengthDTW_MaxWindow.csv")
 
+data$Group = factor(data$TimeSeriesLength)
 plotXYZ <- function(df, name, metric){
   results <- lapply(c(1,2,3), function(x){
     axis <- c("AccuracyX","AccuracyY","AccuracyZ")
@@ -24,10 +21,10 @@ plotXYZ <- function(df, name, metric){
     title_val <- paste0(data_name[x], " Classification Accuracy (",metric,") vs. Time Series Length")
     return(
       ggplot(df, aes_string(x="TimeSeriesLength", y=axis[x], group="Group")) +
-        geom_boxplot() +
+        geom_boxplot(width=15) +
         #geom_point() +
         #geom_smooth(method="loess") +
-        #scale_y_continuous(limits=c(0,1)) +
+        #scale_y_continuous(limits=c(0.5,0.67)) +
         theme_bw() +
         labs(
           title=title_val,
@@ -39,7 +36,7 @@ plotXYZ <- function(df, name, metric){
   return(results)
 }
 
-plots = plotXYZ(data, "Cricket","Euclidean")
+plots = plotXYZ(data, "Cricket","DTW")
 plots = plotXYZ(data, "Gestures","DTW")
 plots[[1]]
 plots[[2]]
@@ -56,11 +53,11 @@ wafer$Group = factor(wafer$TimeSeriesLength)
 
 # WAFER Boxplot
 ggplot(wafer, aes(x=TimeSeriesLength, y=Accuracy, group=Group)) +
-  geom_boxplot(width=6) +
+  geom_boxplot(width=10) +
   theme_bw() +
   #scale_y_continuous(limits=c(0.8,1)) +
   labs(
-    title="Wafer Classification Accuracy (Euclidean) vs. Time Series Length",
+    title="Wafer Classification Accuracy (DTW) vs. Time Series Length",
     x="Time Series Length",
     y="Classification Accuracy"
   )
@@ -78,9 +75,15 @@ ggplot(wafer, aes(x=TimeSeriesLength, y=Accuracy)) +
     y="Classification Accuracy"
   )
 
-
-
-
-
+#### LENGTHS ####
+cdata <- read.csv("Cricket/Lengths.csv")
+cdata$Dataset <- "Cricket"
+gdata <- read.csv("Gestures/Lengths.csv")
+gdata$Dataset <- "Gestures"
+wdata <- read.csv("Wafer/Lengths.csv")
+wdata$Dataset <- "Wafer"
+ldata <- rbind(cdata,gdata,wdata)
+ggplot(ldata, aes(x=Dataset, y=Length, fill=Dataset)) +
+  geom_boxplot()
 
 
