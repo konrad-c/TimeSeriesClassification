@@ -5,6 +5,7 @@
 \usepackage{amssymb}
 \usepackage{float}
 \newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand{\head}[1]{\textnormal{\textbf{#1}}}
 \usepackage{graphicx}
 \usepackage{scrextend}
 \usepackage{wrapfig}
@@ -101,7 +102,8 @@ This methodology briefly states the platforms which have been used to investigat
 \subsection{Data}
 
 The original UCR Time Series Classification Archive [1] data is not only normalized using z-score normalization, it is additionally split into both training and testing subsets of the full dataset. 
-The raw data available for this project is the data that was used to derive the UCR datasets CricketX, CricketY, CricketZ and Wafer.
+The raw data available for this project is the data that was used to derive the UCR datasets CricketX, CricketY, CricketZ, GesturesX, GesturesY, GesturesZ and Wafer.
+However we define these datasets as Cricket, Gestures and Wafer, and each of the multidimensional datasets (Cricket \& Gestures) will be investigated as three separate datasets.
 In testing the accuracy of classification on this data, we take two approaches.
 The first involving random train/test splits of the same size for a given data set which will provide a distribution of classification accuracy allowing for further analysis of the effect of time series length or normalization techniques in classification.
 The second method is used to determine if any differences exist between the raw data and the UCR repository data.
@@ -147,9 +149,61 @@ We choose to use these three techniques alone due to their power in time series 
 \\\\
 While other methods exist and may provide more accurate classifications, the use of NN classifiers will allow a better understanding of the homogeneity and relatedness of the normalized data within a given class.
 
-
+\pagebreak
 \section{Results}
 
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[width=1\textwidth]{Images/TimeSeriesLength_bydataset.png}
+	\caption{The distribution of time series length for each of the three datasets investigated.}
+\end{center}
+\end{figure}
+
+\subsection{Euclidean Distance Measure}
+
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[width=1\textwidth]{Images/CricketAccuracyVsLengthEUCLIDEAN_box.png}
+	\caption{The distribution of classification accuracy for the \textit{Cricket} dataset as a function of time series length using the Euclidean distance measure in NN prediction.}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[width=1\textwidth]{Images/GesturesAccuracyVsLengthEUCLIDEAN_box.png}
+	\caption{The distribution of classification accuracy for the \textit{Gestures} dataset as a function of time series length using the Euclidean distance measure in NN prediction.}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[width=1\textwidth]{Images/WaferAccuracyVsLengthEUCLIDEAN_box.png}
+	\caption{The distribution of classification accuracy for the \textit{Wafer} dataset as a function of time series length using the Euclidean distance measure in NN prediction.}
+\end{center}
+\end{figure}
+
+\subsection{DTW Distance Measure}
+
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[width=1\textwidth]{Images/CricketAccuracyVsLengthDTW_box.png}
+	\caption{The distribution of classification accuracy for the \textit{Cricket} dataset as a function of time series length using the DTW distance measure in NN prediction.}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[width=1\textwidth]{Images/GesturesAccuracyVsLengthDTW_box.png}
+	\caption{The distribution of classification accuracy for the \textit{Gestures} dataset as a function of time series length using the DTW distance measure in NN prediction.}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+	\includegraphics[width=1\textwidth]{Images/WaferAccuracyVsLengthDTW_box.png}
+	\caption{The distribution of classification accuracy for the \textit{Wafer} dataset as a function of time series length using the DTW distance measure in NN prediction.}
+\end{center}
+\end{figure}
 
 
 \section{Discussion}
@@ -159,21 +213,69 @@ While other methods exist and may provide more accurate classifications, the use
 
 
 \subsection{Time Series Length Normalization}
-This section of the report focuses on the effects of time series length normalization on each of the two datasets investigated.
+This section of the report focuses on the effects of time series length normalization on each of the three datasets investigated.
+\\\\
+While each of the datasets are quite different in nature, we find clear similarities with regard to both Euclidean distance measures as well as DTW distance measures with respect to classification accuracy.
 
-\subsubsection{Cricket}
+\subsubsection{Euclidean Distance Measure}
+The data collected for all three datasets using a Euclidean distance measure for Nearest Neighbour Classification shows there exists an optimal time series length for Euclidean NN classification.
+In \textit{Figure 2} \& \textit{Figure 3} we observe the classification accuracy approaches a maximum as the time series length increases.
+However this maximum classification accuracy is reached at a very small time series length  and remains almost stable as the length continues to increase.
+\\\\
+Here we introduce the idea of a minimum time series representation (MTSR) which additionally minimise information loss in the data (maximise classification accuracy).
+In the case of \textit{Cricket}, we have a minimum information loss at a time series length close to the initial values of the time series', ~1200.
+However while this minimises the information loss, we are able to achieve the same classification accuracy at a time series length of 40, and a marginally higher distribution of classification accuracy for a time series length of 90.
+The main benefit of a MTSR is faster classification due to the reduced computational complexity of performing Euclidean distance measurements on a smaller time series.
+\\\\
+In the \textit{Wafer} dataset, as shown in \textit{Figure 4}, we observe similar results, where the classification accuracy remains stable as the time series length increase.
+In this dataset, we see a clear maximum classification accuracy for a length of 30.
+However we obtain a similar accuracy distribution with a time series length of 10-20 as we do with a length of 300.
 
-This dataset, comprised of three dimensions X, Y and Z, can be investigated as three separate datasets.
 
-\subsubsection{Wafer}
+\subsubsection{DTW Distance Measure}
+The classification accuracy results using a DTW distance measure differ significantly from the results and findings using Euclidean distance measures.
+Each of the three datasets show a clear maximum classification accuracy.
+With each of the datasets having an optimal time series length and classification accuracies as below:\\
 
+\begin{tabular}{lcccc}
+\hline
+\head{Dataset} & \head{Avg. Accuracy} & \head{Optimal Length} & \head{Optimal Accuracy}\\
+\hline
+CricketX & 0.6299 & 100 & 0.7756 \\
+CricketY & 0.7063 & 100 & 0.8353 \\
+CricketZ & 0.6888 & 100 & 0.8061 \\
+\hline
+GesturesX & 0.5768 & 60 & 0.6459 \\
+GesturesY & 0.5708 & 40 & 0.6498 \\
+GesturesZ & 0.5293 & 50 & 0.5975 \\
+\hline
+Wafer & 0.9142 & 325 & 0.9214 \\
+\hline
+
+\end{tabular}
+\\\\
+In both \textit{Cricket} and \textit{Gesture} datasets there is a significant absolute increase in the classification accuracy.
+While \textit{Wafer} appears to be only a marginal improvement in classification accuracy, in comparison to accuracy at different time series lengths, the accuracy is 0.77 standard deviations above the mean accuracy across all lengths shown.
+This increase above the mean accuracy holds for both \textit{Cricket} and \textit{Gestures} as well, with optimal time series length accuracy in \textit{Cricket} being 1.66, 1.36 and 1.24 standard deviations above the mean for \textit{Cricket} X, Y and Z respectively.
+\textit{Gestures}, with optimal time series length accuracy 1.12, 1.23 and 1.15 standard deviations above the mean for \textit{Gestures} X, Y and Z respectively.
+\\\\
+These are all significant improvements to the average accuracy for other time series lengths, however the most notable aspect of these results is that there exists an optimal time series length that maximises the accuracy when using DTW.
+In contrast to Euclidean measures, where there exists a minimal representation of the time series that still maximises the classification accuracy, DTW has a clear maximum with respect to time series length.
+Due to the single maximum, there also exists some symmetry, where on either side of the optimal length, there are lengths that result in the same accuracy.
+For example, in \textit{Cricket}, time series lengths of 30 and 550 result in extremely similar classification accuracy, however in order to maximise speed of computation, choosing the length of 30 would be optimal.
+\\\\
+
+TALK ABOUT WHY THE OPTIMAL LENGTH IS THAT LENGTH, I>E> I DUNNO
 
 
 \section{Conclusions}
 
+Euclidean distance measures, while known to be a less accurate measure than DTW in time series classification, shows to be more stable than DTW.
+DTW in comparison, shows to have an optimum time series length for maximum classification accuracy.
+
 \section{Further Work}
 
-Due to only two datasets being available to this research, our findings are localised to the datasets discussed.
+Due to only three datasets being available to this research, our findings are localised to the datasets discussed.
 While our conclusions regarding time series length and normalization techniques with respect to these datasets hold true, the nature of the data is important in relation to classification accuracy.
 Due to this, more work is required to understand the effect of time series length normalization and scalar normalization on other data from both the UCR Time Series Classification Archive [1] and other data.
 Additionally further investigation is required into multivariate time series. 

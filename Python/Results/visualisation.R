@@ -82,8 +82,31 @@ gdata <- read.csv("Gestures/Lengths.csv")
 gdata$Dataset <- "Gestures"
 wdata <- read.csv("Wafer/Lengths.csv")
 wdata$Dataset <- "Wafer"
+
 ldata <- rbind(cdata,gdata,wdata)
-ggplot(ldata, aes(x=Dataset, y=Length, fill=Dataset)) +
-  geom_boxplot()
 
+cgraph <- ggplot(cdata, aes(x=Dataset,y=Length)) +
+  geom_boxplot() +
+  theme_bw()+
+  labs(x="", y="") +
+  coord_flip()
+ggraph <- ggplot(gdata, aes(x=Dataset,y=Length)) +
+  geom_boxplot() +
+  theme_bw()+
+  labs(x="", y="") +
+  coord_flip()
+wgraph <- ggplot(wdata, aes(x=Dataset,y=Length)) +
+  geom_boxplot() +
+  theme_bw()+
+  labs(x="",y="Time Series Length") +
+  coord_flip()
+grid.arrange(cgraph, ggraph, wgraph, ncol=1, nrow=3)
 
+sqrt(var(data$AccuracyX))
+[1] 0.06147466
+> sqrt(var(data$AccuracyY))
+[1] 0.06416432
+> sqrt(var(data$AccuracyZ))
+[1] 0.05923888
+
+(0.5975-0.5293)/0.05923888

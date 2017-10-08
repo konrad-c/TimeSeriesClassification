@@ -7,11 +7,13 @@
 \contentsline {subsubsection}{\numberline {3.2.1}Scalar Normalization}{3}
 \contentsline {subsubsection}{\numberline {3.2.2}Time Series Length Normalization}{4}
 \contentsline {subsection}{\numberline {3.3}Classification Techniques}{4}
-\contentsline {section}{\numberline {4}Results}{5}
-\contentsline {section}{\numberline {5}Discussion}{5}
-\contentsline {subsection}{\numberline {5.1}Scalar Normalization}{5}
-\contentsline {subsection}{\numberline {5.2}Time Series Length Normalization}{5}
-\contentsline {subsubsection}{\numberline {5.2.1}Cricket}{5}
-\contentsline {subsubsection}{\numberline {5.2.2}Wafer}{5}
-\contentsline {section}{\numberline {6}Conclusions}{5}
-\contentsline {section}{\numberline {7}Further Work}{5}
+\contentsline {section}{\numberline {4}Results}{6}
+\contentsline {subsection}{\numberline {4.1}Euclidean Distance Measure}{7}
+\contentsline {subsection}{\numberline {4.2}DTW Distance Measure}{10}
+\contentsline {section}{\numberline {5}Discussion}{12}
+\contentsline {subsection}{\numberline {5.1}Scalar Normalization}{12}
+\contentsline {subsection}{\numberline {5.2}Time Series Length Normalization}{12}
+\contentsline {subsubsection}{\numberline {5.2.1}Euclidean Distance Measure}{12}
+\contentsline {subsubsection}{\numberline {5.2.2}DTW Distance Measure}{13}
+\contentsline {section}{\numberline {6}Conclusions}{14}
+\contentsline {section}{\numberline {7}Further Work}{14}
